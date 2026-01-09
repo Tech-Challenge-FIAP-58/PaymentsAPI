@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FCG.Payments/FCG.Payments.csproj" />
+  </Folder>
+  <Folder Name="/src/Core/">
+    <Project Path="src/FCG.Core/FCG.Core.csproj" Id="fa600890-da7b-47da-815e-4a9ca518d2b4" />
+  </Folder>
+  <Folder Name="/src/FakePaymentService/">
+    <Project Path="src/FCG.FakePaymentProvider/FCG.FakePaymentProvider.csproj" />
+  </Folder>
+</Solution>
