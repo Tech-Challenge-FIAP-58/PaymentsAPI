@@ -1,12 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FCG.Core.DomainObjects;
+using FCG.Payments.Models.Enums;
 
-namespace FCG.Payments.Models
+namespace FCG.Payments.Models;
+
+public class Payment : Entity
 {
-    public class Payment
+    public Payment()
     {
+        Transactions = new List<Transaction>();
+    }
+
+    public Guid OrderId { get; set; }
+    public PaymentMethod PaymentType { get; set; }
+    public decimal Amount { get; set; }
+
+    public CreditCard CreditCard { get; set; }
+
+    // EF Relation
+    public ICollection<Transaction> Transactions { get; set; }
+
+    public void AddTransaction(Transaction transaction)
+    {
+        Transactions.Add(transaction);
     }
 }

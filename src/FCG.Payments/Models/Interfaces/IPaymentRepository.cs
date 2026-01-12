@@ -1,11 +1,10 @@
 ﻿namespace FCG.Payments.Models.Interfaces
 {
-    internal interface IPaymentRepository
+    public interface IPaymentRepository
     {
         void AddPayment(Payment payment);
         void AddTransaction(Transaction transaction);
-        Task<Payment?> GetPaymentByIdAsync(Guid paymentId);
-        Task<Payment?> GetPaymentByOrderId(Guid paymentId);
-        Task<Payment?> GetTransactionsByOrderId(Guid paymentId);
+        Task<Payment> GetPaymentByOrderId(Guid orderId);
+        Task<IEnumerable<Transaction>> GetTransactionsByOrderId(Guid orderId);
     }
 }

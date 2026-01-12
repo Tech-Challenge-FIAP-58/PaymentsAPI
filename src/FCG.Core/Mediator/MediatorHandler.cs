@@ -1,6 +1,6 @@
 ﻿using FluentValidation.Results;
-using MediatR;
 using FCG.Core.Messages;
+using MediatR;
 
 namespace FCG.Core.Mediator
 {

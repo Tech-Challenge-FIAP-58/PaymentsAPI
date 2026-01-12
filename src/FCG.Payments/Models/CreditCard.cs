@@ -1,12 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FCG.Core.DomainObjects;
 
-namespace FCG.Payments.Models
+namespace FCG.Payments.Models;
+
+public class CreditCard : Entity
 {
-    internal class CreditCard
+    public string CardName { get; set; }
+    public string CardNumber { get; set; }
+    public string CardExpirationDate { get; set; }
+    public string CVV { get; set; }
+
+    protected CreditCard() { }
+
+    public CreditCard(string cardName, string cardNumber, string cardExpirationDate, string cVV)
     {
+        CardName = cardName;
+        CardNumber = cardNumber;
+        CardExpirationDate = cardExpirationDate;
+        CVV = cVV;
     }
 }

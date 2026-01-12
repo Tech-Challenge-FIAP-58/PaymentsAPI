@@ -2,14 +2,14 @@
 
 namespace FCG.FakePaymentProvider
 {
-   public class Transaction
+   public class TransactionFake
     {
-        public Transaction(FakePaymentService nerdsPagService)
+        public TransactionFake(FakePaymentService nerdsPagService)
         {
             NerdsPagService = nerdsPagService;
         }
 
-        protected Transaction(){}
+        protected TransactionFake(){}
 
         private readonly FakePaymentService NerdsPagService;
 
@@ -17,7 +17,7 @@ namespace FCG.FakePaymentProvider
 
         public int SubscriptionId { get; set; }
 
-        public TransactionStatus Status { get; set; }
+        public TransactionStatusFake Status { get; set; }
 
         public int AuthorizationAmount { get; set; }
 
@@ -67,7 +67,7 @@ namespace FCG.FakePaymentProvider
 
         public string PostbackUrl { get; set; }
 
-        public PaymentMethod PaymentMethod { get; set; }
+        public PaymentMethodFake PaymentMethod { get; set; }
 
         public float? AntifraudScore { get; set; }
 
@@ -91,21 +91,21 @@ namespace FCG.FakePaymentProvider
 
         public DateTime TransactionDate { get; set; }
 
-        public Task<Transaction> AuthorizeCardTransaction()
+        public Task<TransactionFake> AuthorizeCardTransaction()
         {
             var success = new Random().Next(2) == 0;
-            Transaction transaction;
+            TransactionFake transaction;
 
             if (success)
             {
-                transaction = new Transaction
+                transaction = new TransactionFake
                 {
                     AuthorizationCode = GetGenericCode(),
                     CardBrand = "MasterCard",
                     TransactionDate = DateTime.Now,
                     Cost = Amount * (decimal)0.03,
                     Amount = Amount,
-                    Status = TransactionStatus.Authorized,
+                    Status = TransactionStatusFake.Authorized,
                     Tid = GetGenericCode(),
                     Nsu = GetGenericCode()
                 };
@@ -113,14 +113,14 @@ namespace FCG.FakePaymentProvider
                 return Task.FromResult(transaction);
             }
 
-            transaction = new Transaction
+            transaction = new TransactionFake
             {
                 AuthorizationCode = "",
                 CardBrand = "",
                 TransactionDate = DateTime.Now,
                 Cost = 0,
                 Amount = 0,
-                Status = TransactionStatus.Refused,
+                Status = TransactionStatusFake.Refused,
                 Tid = "",
                 Nsu = ""
             };
@@ -128,16 +128,16 @@ namespace FCG.FakePaymentProvider
             return Task.FromResult(transaction);
         }
 
-        public Task<Transaction> CaptureCardTransaction()
+        public Task<TransactionFake> CaptureCardTransaction()
         {
-            var transaction = new Transaction
+            var transaction = new TransactionFake
                 {
                     AuthorizationCode = GetGenericCode(),
                     CardBrand = CardBrand,
                     TransactionDate = DateTime.Now,
                     Cost = 0,
                     Amount = Amount,
-                    Status = TransactionStatus.Paid,
+                    Status = TransactionStatusFake.Paid,
                     Tid = Tid,
                     Nsu = Nsu
                 };
@@ -145,16 +145,16 @@ namespace FCG.FakePaymentProvider
             return Task.FromResult(transaction);
         }
 
-        public Task<Transaction> CancelAuthorization()
+        public Task<TransactionFake> CancelAuthorization()
         {
-            var transaction = new Transaction
+            var transaction = new TransactionFake
             {
                 AuthorizationCode = "",
                 CardBrand = CardBrand,
                 TransactionDate = DateTime.Now,
                 Cost = 0,
                 Amount = Amount,
-                Status = TransactionStatus.Cancelled,
+                Status = TransactionStatusFake.Cancelled,
                 Tid = Tid,
                 Nsu = Nsu
             };

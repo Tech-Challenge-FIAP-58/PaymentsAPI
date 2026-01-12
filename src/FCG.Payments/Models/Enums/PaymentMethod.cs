@@ -1,6 +1,6 @@
 ﻿namespace FCG.Payments.Models.Enums;
 
-internal enum PaymentType
+public enum PaymentMethod
 {
     CreditCard = 1,
     Invoice, //Boleto??

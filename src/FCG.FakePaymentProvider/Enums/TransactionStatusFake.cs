@@ -1,6 +1,6 @@
 ﻿namespace FCG.FakePaymentProvider.Enums
 {
-    public enum TransactionStatus
+    public enum TransactionStatusFake
     {
         Authorized = 1,
         Paid,

@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/FCG.Payments/FCG.Payments.csproj" />
+    <Project Path="src/FGC.Publisher.Test/FGC.Publisher.Test.csproj" Id="64dd426f-6c83-4f57-af6b-acfbec0e79d1" />
   </Folder>
   <Folder Name="/src/Core/">
     <Project Path="src/FCG.Core/FCG.Core.csproj" Id="fa600890-da7b-47da-815e-4a9ca518d2b4" />

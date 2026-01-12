@@ -1,6 +1,6 @@
 ﻿namespace FCG.Payments.Models.Enums;
 
-internal enum TransactionStatus
+public enum TransactionStatus
 {
     Authorized = 1,
     Paid,

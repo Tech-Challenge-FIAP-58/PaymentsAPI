@@ -1,0 +1,19 @@
+﻿using FCG.Payments.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace FCG.Payments.Data.Mappings
+{
+    public class TransactionMapping : IEntityTypeConfiguration<Transaction>
+    {
+        public void Configure(EntityTypeBuilder<Transaction> builder)
+        {
+            builder.HasKey(c => c.Id);
+
+            builder.HasOne(c => c.Payment)
+                .WithMany(c => c.Transactions);
+
+            builder.ToTable("Transactions");
+        }
+    }
+}
