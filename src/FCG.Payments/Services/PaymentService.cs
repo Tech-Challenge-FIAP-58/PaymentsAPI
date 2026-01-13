@@ -1,11 +1,11 @@
-﻿using FCG.Core.Data.Interfaces;
-using FCG.Core.DomainObjects;
+﻿using FCG.Payments.Models.Interfaces;
 using FCG.Core.Messages.Integration;
+using FCG.Payments.Models.Enums;
+using FluentValidation.Results;
+using FCG.Core.Data.Interfaces;
+using FCG.Core.DomainObjects;
 using FCG.Payments.Facade;
 using FCG.Payments.Models;
-using FCG.Payments.Models.Enums;
-using FCG.Payments.Models.Interfaces;
-using FluentValidation.Results;
 
 namespace FCG.Payments.Services;
 
@@ -47,7 +47,7 @@ public class PaymentService : IPaymentService
         payment.AddTransaction(transaction);
         _paymentRepository.AddPayment(payment);
 
-        if (!await _unitOfWork.Commit())
+        if (!await _unitOfWork.CommitAsync())
         {
             validationResult.Errors.Add(new ValidationFailure("Payment",
                 "An error occurred while processing the payment"));
@@ -82,7 +82,7 @@ public class PaymentService : IPaymentService
         transaction.PaymentId = authorizedTransaction.PaymentId;
         _paymentRepository.AddTransaction(transaction);
 
-        if (!await _unitOfWork.Commit())
+        if (!await _unitOfWork.CommitAsync())
         {
             validationResult.Errors.Add(new ValidationFailure("Payment",
                 $"Could not persist the payment capture for order {orderId}"));
@@ -114,7 +114,7 @@ public class PaymentService : IPaymentService
         transaction.PaymentId = authorizedTransaction.PaymentId;
         _paymentRepository.AddTransaction(transaction);
 
-        if (!await _unitOfWork.Commit())
+        if (!await _unitOfWork.CommitAsync())
         {
             validationResult.Errors.Add(new ValidationFailure("Payment",
                 $"Could not persist the payment cancellation for order {orderId}"));

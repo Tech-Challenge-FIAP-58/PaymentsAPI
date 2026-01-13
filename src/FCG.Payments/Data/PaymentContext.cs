@@ -1,7 +1,9 @@
-﻿using FCG.Core.Messages;
-using FCG.Payments.Models;
+﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+using FCG.Payments.Models;
+using FCG.Core.Messages;
+using Microsoft.EntityFrameworkCore.Storage;
+using System.Data;
 
 namespace FCG.Payments.Data
 {
@@ -14,8 +16,18 @@ namespace FCG.Payments.Data
             ChangeTracker.AutoDetectChangesEnabled = false;
         }
 
+        public bool HasActiveTransaction { get; private set; } = false;
+
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        {
+            if (HasActiveTransaction)
+                throw new InvalidOperationException("Já existe uma transação ativa.");
+
+            return await Database.BeginTransactionAsync(isolationLevel);
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

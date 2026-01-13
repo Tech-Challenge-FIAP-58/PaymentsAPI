@@ -1,4 +1,5 @@
-﻿using FCG.Payments.Data;
+﻿using FCG.Core.Data.Interfaces;
+using FCG.Payments.Data;
 using FCG.Payments.Data.Repositories;
 using FCG.Payments.Facade;
 using FCG.Payments.Models.Interfaces;
@@ -17,6 +18,7 @@ namespace FCG.Payments.Configuration
             builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IPaymentFacade, CreditCardPaymentFacade>();
 
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
         }
     }

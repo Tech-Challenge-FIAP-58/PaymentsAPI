@@ -1,9 +1,8 @@
-﻿namespace FCG.Core.Data.Interfaces
+﻿namespace FCG.Core.Data.Interfaces;
+
+public interface IUnitOfWork
 {
-    public interface IUnitOfWork
-    {
-        Task BeginTransaction();
-        Task<bool> Commit();
-        Task Rollback();
-    }
+    Task BeginTransactionAsync(CancellationToken cancellationToken = default);
+    Task RollBackTransactionAsync(CancellationToken cancellationToken = default);
+    Task<bool> CommitAsync(CancellationToken cancellationToken = default);
 }

@@ -3,6 +3,7 @@
 public class PaymentProcessedEvent: IntegrationEvent
 {
     public Guid ClientId { get; private set; }
+
     public Guid OrderId { get; private set; }
 
     public PaymentProcessedEvent(Guid clientId, Guid orderId)

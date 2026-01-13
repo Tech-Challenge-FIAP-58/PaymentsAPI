@@ -19,8 +19,14 @@ namespace FCG.Core.Messages
 
         protected async Task<ValidationResult> PersistirDados(IUnitOfWork uow)
         {
-            if (!await uow.Commit()) 
+            try
+            {
+                await uow.CommitAsync();
+            }
+            catch (Exception)
+            {
                 AdicionarErro("Houve um erro ao persistir os dados.");
+            }
 
             return ValidationResult;
         }
