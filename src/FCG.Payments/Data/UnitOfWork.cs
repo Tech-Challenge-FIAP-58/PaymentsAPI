@@ -1,5 +1,5 @@
-﻿using FCG.Core.Data.Interfaces;
-using Microsoft.EntityFrameworkCore.Storage;
+﻿using Microsoft.EntityFrameworkCore.Storage;
+using FCG.Core.Data.Interfaces;
 
 namespace FCG.Payments.Data;
 
@@ -15,8 +15,12 @@ public class UnitOfWork : IUnitOfWork
 
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
-        await _context.BeginTransactionAsync();
+        if (_transaction != null)
+            throw new InvalidOperationException("Já existe uma transação ativa.");
+
+        _transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
     }
+
 
     public async Task<bool> CommitAsync(CancellationToken cancellationToken = default)
     {
@@ -34,35 +38,13 @@ public class UnitOfWork : IUnitOfWork
             await RollBackTransactionAsync(cancellationToken);
             throw;
         }
-        finally
-        {
-            await _transaction.DisposeAsync();
-            _transaction = null;
-        }
     }
 
     public async Task RollBackTransactionAsync(CancellationToken cancellationToken = default)
     {
-        if (_transaction != null)
-        {
-            await _transaction.RollbackAsync(cancellationToken);
-            await _transaction.DisposeAsync();
-            _transaction = null;
-        }
-    }
+        if (_transaction == null)
+            return;
 
-    public void Dispose()
-    {
-        _transaction?.Dispose();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_transaction != null)
-        {
-            await _transaction.DisposeAsync();
-        }
-
-        await _context.DisposeAsync();
+        await _transaction.RollbackAsync(cancellationToken);
     }
 }

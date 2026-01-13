@@ -30,6 +30,7 @@ namespace FCG.Core.DomainObjects
         {
             _notificacoes?.Clear();
         }
+
         #region Comparações
         public override bool Equals(object obj)
         {
