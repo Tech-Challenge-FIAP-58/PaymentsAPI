@@ -1,7 +1,8 @@
-﻿using FCG.Payments.Configuration.Dtos;
-using Microsoft.Extensions.Options;
+﻿using FCG.Core.Messages.Integration;
+using FCG.Payments.Configuration.Dtos;
 using FCG.Payments.Consumers;
 using MassTransit;
+using Microsoft.Extensions.Options;
 
 namespace FCG.Payments.Configuration
 {
@@ -11,7 +12,7 @@ namespace FCG.Payments.Configuration
         {
             builder.Services.AddMassTransit(x =>
             {
-                x.AddConsumer<OrderPlacedEventConsumer>();
+                x.AddConsumer<OrderPaymentRequestedConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -23,6 +24,11 @@ namespace FCG.Payments.Configuration
                     {
                         h.Username(rabbitSettings.Username);
                         h.Password(rabbitSettings.Password);
+                    });
+
+                    cfg.ReceiveEndpoint("payment-processed-debug-queue", e =>
+                    {
+                        e.Bind<PaymentProcessedIntegrationEvent>();
                     });
 
                     cfg.ConfigureEndpoints(context);

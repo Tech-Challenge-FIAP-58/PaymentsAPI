@@ -15,23 +15,23 @@ namespace FCG.Core.DomainObjects
 
         public IReadOnlyCollection<Event> Notificacoes => _notificacoes?.AsReadOnly();
 
-        public void AdicionarEvento(Event evento)
+        public void AddEvent(Event evento)
         {
             _notificacoes = _notificacoes ?? new List<Event>();
             _notificacoes.Add(evento);
         }
 
-        public void RemoverEvento(Event evento)
+        public void RemoveEvent(Event evento)
         {
             _notificacoes?.Remove(evento);
         }
 
-        public void LimparEventos()
+        public void ClearEvents()
         {
             _notificacoes?.Clear();
         }
 
-        #region Comparações
+        #region Comparisons
         public override bool Equals(object obj)
         {
             var compareTo = obj as Entity;

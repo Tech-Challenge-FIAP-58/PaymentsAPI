@@ -1,19 +1,25 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
-using FCG.Payments.Models;
+﻿using FCG.Core.DomainObjects;
+using FCG.Core.Mediator;
 using FCG.Core.Messages;
+using FCG.Payments.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 
 namespace FCG.Payments.Data
 {
     public class PaymentContext : DbContext
     {
-        public PaymentContext(DbContextOptions<PaymentContext> options)
+        private readonly IMediatorHandler _mediatorHandler;
+
+        public PaymentContext(DbContextOptions<PaymentContext> options, 
+            IMediatorHandler mediatorHandler)
             : base(options)
         {
             ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
             ChangeTracker.AutoDetectChangesEnabled = false;
+            _mediatorHandler = mediatorHandler;
         }
 
         public bool HasActiveTransaction { get; private set; } = false;
@@ -42,6 +48,43 @@ namespace FCG.Payments.Data
                 .SelectMany(e => e.GetForeignKeys())) relationship.DeleteBehavior = DeleteBehavior.ClientSetNull;
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(PaymentContext).Assembly);
+        }
+
+        public override async Task<int> SaveChangesAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var affectedRows = await base.SaveChangesAsync();
+
+            if (!(affectedRows > 0)) return affectedRows;
+
+            await _mediatorHandler.PublishEvents(this);
+
+            return affectedRows;
+        }
+    }
+
+    public static class MediatorExtension
+    {
+        public static async Task PublishEvents<T>(this IMediatorHandler mediator, T ctx) where T : DbContext
+        {
+            var domainEntities = ctx.ChangeTracker
+                .Entries<Entity>()
+                .Where(x => x.Entity.Notificacoes != null && x.Entity.Notificacoes.Any());
+
+            var domainEvents = domainEntities
+                .SelectMany(x => x.Entity.Notificacoes)
+                .ToList();
+
+            domainEntities.ToList()
+                .ForEach(entity => entity.Entity.ClearEvents());
+
+            var tasks = domainEvents
+                .Select(async (domainEvent) =>
+                {
+                    await mediator.PublishEvent(domainEvent);
+                });
+
+            await Task.WhenAll(tasks);
         }
     }
 }
