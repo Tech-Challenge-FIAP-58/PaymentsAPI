@@ -10,6 +10,9 @@ namespace FCG.Payments.Data.Mappings
         {
             builder.HasKey(c => c.Id);
 
+            builder.HasIndex(p => p.OrderId)
+                .IsUnique();
+
             builder.Ignore(c => c.CreditCard);
 
             // 1 : N => Pagamento : Transacao

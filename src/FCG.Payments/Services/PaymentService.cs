@@ -35,6 +35,9 @@ public class PaymentService : IPaymentService
     {
         Transaction transaction = null;
 
+        if ((await _paymentRepository.GetPaymentByOrderId(payment.OrderId)) is not null)
+            return;
+
         await _unitOfWork.BeginTransactionAsync();
 
         for (var attempt = 1; attempt <= MAXATTEMPTS; attempt++)
