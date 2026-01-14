@@ -1,4 +1,5 @@
 ﻿using FCG.Core.Messages.Integration;
+using FCG.Core.Objects;
 using FCG.Payments.Configuration.Dtos;
 using FCG.Payments.Consumers;
 using MassTransit;
@@ -24,6 +25,14 @@ namespace FCG.Payments.Configuration
                     {
                         h.Username(rabbitSettings.Username);
                         h.Password(rabbitSettings.Password);
+                    });
+
+                    cfg.UseMessageRetry(r =>
+                    {
+                        r.Interval(
+                            RetrySettings.MaxRetryAttempts,
+                            TimeSpan.FromSeconds(RetrySettings.DelayBetweenRetriesInSeconds)
+                        );
                     });
 
                     cfg.ReceiveEndpoint("payment-processed-debug-queue", e =>
