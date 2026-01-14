@@ -40,7 +40,7 @@ await host.StartAsync();
 // ============================
 var bus = host.Services.GetRequiredService<IBus>();
 
-var message = new OrderPaymentRequestedIntegrationEvent(
+var message = new OrderPlacedIntegrationEvent(
     clientId: Guid.NewGuid(),
     orderId: Guid.NewGuid(),
     paymentMethod: 1,

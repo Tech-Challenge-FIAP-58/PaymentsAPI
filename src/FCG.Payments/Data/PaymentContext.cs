@@ -22,18 +22,8 @@ namespace FCG.Payments.Data
             _mediatorHandler = mediatorHandler;
         }
 
-        public bool HasActiveTransaction { get; private set; } = false;
-
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
-
-        public async Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
-        {
-            if (HasActiveTransaction)
-                throw new InvalidOperationException("Já existe uma transação ativa.");
-
-            return await Database.BeginTransactionAsync(isolationLevel);
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

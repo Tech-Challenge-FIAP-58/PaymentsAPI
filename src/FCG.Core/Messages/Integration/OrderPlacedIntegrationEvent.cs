@@ -1,6 +1,6 @@
 ﻿namespace FCG.Core.Messages.Integration;
 
-public class OrderPaymentRequestedIntegrationEvent : IntegrationEvent
+public class OrderPlacedIntegrationEvent : IntegrationEvent
 {
     public Guid ClientId { get; set; }
     public Guid OrderId { get; set; }
@@ -11,7 +11,7 @@ public class OrderPaymentRequestedIntegrationEvent : IntegrationEvent
     public string ExpirationDate { get; set; }
     public string Cvv { get; set; }
 
-    public OrderPaymentRequestedIntegrationEvent(Guid clientId, Guid orderId, int paymentMethod, decimal amount, string cardName,
+    public OrderPlacedIntegrationEvent(Guid clientId, Guid orderId, int paymentMethod, decimal amount, string cardName,
     string cardNumber, string expirationDate, string cvv)
     {
         ClientId = clientId;

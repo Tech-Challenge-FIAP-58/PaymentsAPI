@@ -7,7 +7,7 @@ using MassTransit;
 namespace FCG.Payments.Consumers;
 
 public class OrderPaymentRequestedConsumer
-    : IConsumer<OrderPaymentRequestedIntegrationEvent>
+    : IConsumer<OrderPlacedIntegrationEvent>
 {
     private readonly IPaymentService _paymentService;
 
@@ -17,7 +17,7 @@ public class OrderPaymentRequestedConsumer
     }
 
     public async Task Consume(
-        ConsumeContext<OrderPaymentRequestedIntegrationEvent> context)
+        ConsumeContext<OrderPlacedIntegrationEvent> context)
     {
         await _paymentService.ProcessPayment(
             MapToPayment(context.Message)
@@ -25,7 +25,7 @@ public class OrderPaymentRequestedConsumer
     }
 
     private static Payment MapToPayment(
-        OrderPaymentRequestedIntegrationEvent message)
+        OrderPlacedIntegrationEvent message)
     {
         return new Payment(
                         message.OrderId,

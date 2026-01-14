@@ -1,9 +1,6 @@
 ﻿using FCG.Payments.Models.Interfaces;
-using FCG.Core.Messages.Integration;
 using FCG.Payments.Models.Enums;
-using FluentValidation.Results;
 using FCG.Core.Data.Interfaces;
-using FCG.Core.DomainObjects;
 using FCG.Payments.Facade;
 using FCG.Payments.Models;
 
