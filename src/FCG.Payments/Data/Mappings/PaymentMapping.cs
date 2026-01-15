@@ -10,6 +10,9 @@ namespace FCG.Payments.Data.Mappings
         {
             builder.HasKey(c => c.Id);
 
+            builder.Property(c => c.Id)
+                .ValueGeneratedOnAdd();
+
             builder.HasIndex(p => p.OrderId)
                 .IsUnique();
 

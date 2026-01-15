@@ -13,7 +13,7 @@ namespace FCG.Payments.Configuration
         {
             builder.Services.AddMassTransit(x =>
             {
-                x.AddConsumer<OrderPaymentRequestedConsumer>();
+                x.AddConsumer<OrderPlacedEventConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -33,11 +33,6 @@ namespace FCG.Payments.Configuration
                             RetrySettings.MaxRetryAttempts,
                             TimeSpan.FromSeconds(RetrySettings.DelayBetweenRetriesInSeconds)
                         );
-                    });
-
-                    cfg.ReceiveEndpoint("payment-processed-debug-queue", e =>
-                    {
-                        e.Bind<PaymentProcessedIntegrationEvent>();
                     });
 
                     cfg.ConfigureEndpoints(context);

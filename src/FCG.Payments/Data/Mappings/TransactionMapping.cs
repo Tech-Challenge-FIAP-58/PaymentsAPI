@@ -9,6 +9,9 @@ namespace FCG.Payments.Data.Mappings
         public void Configure(EntityTypeBuilder<Transaction> builder)
         {
             builder.HasKey(c => c.Id);
+            
+            builder.Property(c => c.Id)
+                .ValueGeneratedOnAdd();
 
             builder.HasOne(c => c.Payment)
                 .WithMany(c => c.Transactions);

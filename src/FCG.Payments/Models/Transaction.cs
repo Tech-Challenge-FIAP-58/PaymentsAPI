@@ -1,11 +1,10 @@
-﻿using FCG.Core.DomainObjects;
-using FCG.Payments.Models.Enums;
+﻿using FCG.Payments.Models.Enums;
+using FCG.Core.DomainObjects;
 
 namespace FCG.Payments.Models;
 
 public class Transaction : Entity
 {
-    public Guid Id { get; set; }
     public string AuthorizationCode { get; set; }
     public string CardBrand { get; set; } // Ou CardNetwork
     public DateTime? TransactionDate { get; set; }
@@ -15,7 +14,7 @@ public class Transaction : Entity
     public string Tid { get; set; } // Transaction Identifier
     public string Nsu { get; set; } // Sequential Network Number (Comum em gateways)
 
-    public Guid PaymentId { get; set; }
+    public int PaymentId { get; set; }
 
     // EF Relation
     public Payment Payment { get; set; }

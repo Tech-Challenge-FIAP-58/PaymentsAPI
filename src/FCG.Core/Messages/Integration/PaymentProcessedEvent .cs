@@ -1,16 +1,16 @@
 ﻿namespace FCG.Core.Messages.Integration;
 
-public class PaymentProcessedIntegrationEvent : IntegrationEvent
+public class PaymentProcessedEvent : IntegrationEvent
 {
-    public Guid OrderId { get; }
-    public Guid PaymentId { get; }
+    public int OrderId { get; }
+    public int PaymentId { get; }
     public decimal Amount { get; }
     public PaymentResultStatus Status { get; }
     public string? Reason { get; }
 
-    public PaymentProcessedIntegrationEvent(
-        Guid orderId,
-        Guid paymentId,
+    public PaymentProcessedEvent(
+        int orderId,
+        int paymentId,
         decimal amount,
         PaymentResultStatus status,
         string? reason = null)

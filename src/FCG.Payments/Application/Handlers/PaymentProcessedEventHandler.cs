@@ -5,7 +5,7 @@ using MediatR;
 namespace FCG.Payments.Application.Handlers;
 
 public class PaymentProcessedEventHandler
-    : INotificationHandler<PaymentProcessedIntegrationEvent>
+    : INotificationHandler<PaymentProcessedEvent>
 {
     private readonly IPublishEndpoint _publishEndpoint;
 
@@ -15,11 +15,11 @@ public class PaymentProcessedEventHandler
     }
 
     public async Task Handle(
-        PaymentProcessedIntegrationEvent notification,
+        PaymentProcessedEvent notification,
         CancellationToken cancellationToken)
     {
         await _publishEndpoint.Publish(
-            new PaymentProcessedIntegrationEvent(
+            new PaymentProcessedEvent(
                 notification.OrderId,
                 notification.PaymentId,
                 notification.Amount,

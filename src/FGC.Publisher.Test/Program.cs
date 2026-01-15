@@ -40,9 +40,9 @@ await host.StartAsync();
 // ============================
 var bus = host.Services.GetRequiredService<IBus>();
 
-var message = new OrderPlacedIntegrationEvent(
-    clientId: Guid.NewGuid(),
-    orderId: Guid.NewGuid(),
+var message = new OrderPlacedEvent(
+    clientId: 1,
+    orderId: 1,
     paymentMethod: 1,
     amount: 250.75m,
     cardName: "JOAO A SILVA",

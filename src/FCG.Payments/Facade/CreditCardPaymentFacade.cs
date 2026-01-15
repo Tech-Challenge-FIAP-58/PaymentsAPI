@@ -51,7 +51,6 @@ namespace FCG.Payments.Facade
         {
             return new Transaction
             {
-                Id = Guid.NewGuid(),
                 Status = (TransactionStatus)transaction.Status,
                 TotalAmount = transaction.Amount,
                 CardBrand = transaction.CardBrand,

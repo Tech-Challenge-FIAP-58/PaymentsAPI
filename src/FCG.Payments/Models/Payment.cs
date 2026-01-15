@@ -6,7 +6,7 @@ namespace FCG.Payments.Models;
 
 public class Payment : Entity
 {
-    public Guid OrderId { get; set; }
+    public int OrderId { get; set; }
     public PaymentMethod PaymentMethod { get; set; }
     public decimal Amount { get; set; }
 
@@ -21,7 +21,7 @@ public class Payment : Entity
     }
 
     public Payment(
-        Guid orderId,
+        int orderId,
         PaymentMethod paymentMethod,
         decimal amount,
         CreditCard creditCard)
@@ -46,7 +46,7 @@ public class Payment : Entity
             ? PaymentResultStatus.Approved
             : PaymentResultStatus.Denied;
 
-        AddEvent(new PaymentProcessedIntegrationEvent(
+        AddEvent(new PaymentProcessedEvent(
             OrderId,
             Id,
             Amount,

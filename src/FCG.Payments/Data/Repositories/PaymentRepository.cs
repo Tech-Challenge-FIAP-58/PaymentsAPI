@@ -23,13 +23,13 @@ public class PaymentRepository : IPaymentRepository
         _context.Transactions.Add(transaction);
     }
 
-    public async Task<Payment> GetPaymentByOrderId(Guid orderId)
+    public async Task<Payment> GetPaymentByOrderId(int orderId)
     {
         return await _context.Payments.AsNoTracking()
                         .FirstOrDefaultAsync(p => p.OrderId == orderId);
     }
 
-    public async Task<IEnumerable<Transaction>> GetTransactionsByOrderId(Guid orderId)
+    public async Task<IEnumerable<Transaction>> GetTransactionsByOrderId(int orderId)
     {
         return await _context.Transactions.AsNoTracking()
             .Where(t => t.Payment.OrderId == orderId).ToListAsync();

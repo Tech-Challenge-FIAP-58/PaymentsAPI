@@ -4,12 +4,12 @@ namespace FCG.Core.DomainObjects
 {
     public abstract class Entity
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
-        protected Entity()
-        {
-            Id = Guid.NewGuid();
-        }
+        //protected Entity()
+        //{
+        //    Id = Guid.NewGuid();
+        //}
 
         private List<Event> _notificacoes;
 
