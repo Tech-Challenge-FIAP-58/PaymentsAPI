@@ -21,8 +21,6 @@ namespace FCG.Payments.Configuration
 
             builder.Services.AddScoped<IMediatorHandler, MediatorHandler>();
 
-            builder.Services.AddScoped<INotificationHandler<PaymentProcessedEvent>, PaymentProcessedEventHandler>();
-
             builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IPaymentFacade, CreditCardPaymentFacade>();
 

@@ -32,8 +32,8 @@ public class PaymentService : IPaymentService
     {
         Transaction transaction = null;
 
-        if ((await _paymentRepository.GetPaymentByOrderId(payment.OrderId)) is not null)
-            return;
+        //if ((await _paymentRepository.GetPaymentByOrderId(payment.OrderId)) is not null)
+        //    return;
 
         await _unitOfWork.BeginTransactionAsync();
 

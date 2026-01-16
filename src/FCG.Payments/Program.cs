@@ -1,6 +1,5 @@
 using FCG.Payments.Configuration;
 using FCG.Payments.Facade;
-using MassTransit;
 using MediatR;
 using System.Reflection;
 
@@ -15,8 +14,6 @@ builder.AddMessageBusConfiguration();
 builder.AddMassTransitSettings();
 
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
-
-builder.RegisterServices();
 
 builder.InitilizeRetrySettings();
 

@@ -13,8 +13,8 @@ namespace FCG.Payments.Data.Mappings
             builder.Property(c => c.Id)
                 .ValueGeneratedOnAdd();
 
-            builder.HasIndex(p => p.OrderId)
-                .IsUnique();
+            //builder.HasIndex(p => p.OrderId)
+            //    .IsUnique();
 
             builder.Ignore(c => c.CreditCard);
 
