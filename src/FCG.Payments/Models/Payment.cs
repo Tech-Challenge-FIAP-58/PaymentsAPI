@@ -1,6 +1,7 @@
-﻿using FCG.Core.Messages.Integration;
+﻿using FCG.Core.DomainObjects;
+using FCG.Core.Messages.Integration;
+using FCG.Payments.Domain.Contracts;
 using FCG.Payments.Models.Enums;
-using FCG.Core.DomainObjects;
 
 namespace FCG.Payments.Models;
 
@@ -46,7 +47,7 @@ public class Payment : Entity
             ? PaymentResultStatus.Approved
             : PaymentResultStatus.Denied;
 
-        AddEvent(new PaymentProcessedEvent(
+        AddEvent(new PaymentProcessedDomainEvent(
             OrderId,
             Id,
             Amount,

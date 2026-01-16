@@ -1,11 +1,12 @@
 ﻿using FCG.Core.Messages.Integration;
+using FCG.Payments.Domain.Contracts;
 using MassTransit;
 using MediatR;
 
 namespace FCG.Payments.Application.Handlers;
 
 public class PaymentProcessedEventHandler
-    : INotificationHandler<PaymentProcessedEvent>
+    : INotificationHandler<PaymentProcessedDomainEvent>
 {
     private readonly IPublishEndpoint _publishEndpoint;
 
@@ -15,7 +16,7 @@ public class PaymentProcessedEventHandler
     }
 
     public async Task Handle(
-        PaymentProcessedEvent notification,
+        PaymentProcessedDomainEvent notification,
         CancellationToken cancellationToken)
     {
         await _publishEndpoint.Publish(
