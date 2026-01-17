@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FCG.Payments.Migrations
 {
     /// <inheritdoc />
-    public partial class firstmigration : Migration
+    public partial class FirstMgration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,11 +15,15 @@ namespace FCG.Payments.Migrations
                 name: "Payments",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    OrderId = table.Column<int>(type: "int", nullable: false),
-                    PaymentMethod = table.Column<int>(type: "int", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PaymentMethod = table.Column<string>(type: "varchar(20)", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Status = table.Column<string>(type: "varchar(20)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -30,17 +34,20 @@ namespace FCG.Payments.Migrations
                 name: "Transactions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AuthorizationCode = table.Column<string>(type: "varchar(100)", nullable: false),
                     CardBrand = table.Column<string>(type: "varchar(100)", nullable: false),
                     TransactionDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     TransactionCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<string>(type: "varchar(20)", nullable: false),
                     Tid = table.Column<string>(type: "varchar(100)", nullable: false),
                     Nsu = table.Column<string>(type: "varchar(100)", nullable: false),
-                    PaymentId = table.Column<int>(type: "int", nullable: false)
+                    PaymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -53,10 +60,11 @@ namespace FCG.Payments.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Payments_OrderId",
+                name: "IX_Payment_OrderId",
                 table: "Payments",
                 column: "OrderId",
-                unique: true);
+                unique: true,
+                filter: "[Status] = 'Approved'");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_PaymentId",

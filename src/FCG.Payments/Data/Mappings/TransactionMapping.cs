@@ -15,7 +15,9 @@ namespace FCG.Payments.Data.Mappings
 
             builder.Property(c => c.Status)
                 .IsRequired()
-                .HasConversion<string>();
+                .HasConversion<string>()
+                .HasColumnType("varchar(20)");
+
 
             builder.HasOne(c => c.Payment)
                 .WithMany(c => c.Transactions);

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FCG.Payments.Migrations
 {
     [DbContext(typeof(PaymentContext))]
-    [Migration("20260117192822_ValidacaoDePagamentoEMudancasEnum")]
-    partial class ValidacaoDePagamentoEMudancasEnum
+    [Migration("20260117200632_FirstMgration")]
+    partial class FirstMgration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,11 +48,11 @@ namespace FCG.Payments.Migrations
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -99,7 +99,7 @@ namespace FCG.Payments.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("Tid")
                         .IsRequired()

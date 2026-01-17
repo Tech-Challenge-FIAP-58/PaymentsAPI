@@ -15,11 +15,13 @@ namespace FCG.Payments.Data.Mappings
 
             builder.Property(c => c.Status)
                 .IsRequired()
-                .HasConversion<string>();
+                .HasConversion<string>()
+                .HasColumnType("varchar(20)");
 
             builder.Property(c => c.PaymentMethod)
                 .IsRequired()
-                .HasConversion<string>();
+                .HasConversion<string>()
+                .HasColumnType("varchar(20)");
 
             builder.HasIndex(p => p.OrderId)
                    .HasDatabaseName("IX_Payment_OrderId");
