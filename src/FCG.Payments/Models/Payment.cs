@@ -48,6 +48,10 @@ public class Payment : Entity
             ? PaymentResultStatus.Approved
             : PaymentResultStatus.Denied;
 
+        Status = status == PaymentResultStatus.Approved
+            ? PaymentStatus.Approved
+            : PaymentStatus.Denied;
+
         AddEvent(new PaymentProcessedDomainEvent(
             OrderId,
             Id,

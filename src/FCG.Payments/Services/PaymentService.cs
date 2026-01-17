@@ -6,6 +6,7 @@ using FCG.Core.Data.Interfaces;
 using FCG.Payments.Facade;
 using FCG.Payments.Models;
 using FCG.Core.Mediator;
+using FCG.Payments.Domain.Contracts;
 
 namespace FCG.Payments.Services;
 
@@ -43,10 +44,9 @@ public class PaymentService : IPaymentService
             .FirstOrDefault(x => x.Transactions
                 .Any(t => t.Status == TransactionStatus.Authorized));
 
-        // idempotência: Pagamento já em outro evento com sucesso
         if (successfulPayment is not null)
         {
-            await _mediatorHandler.PublishEvent(new PaymentProcessedEvent(
+            await _mediatorHandler.PublishEvent(new PaymentProcessedDomainEvent(
                 successfulPayment.OrderId,
                 successfulPayment.Id,
                 successfulPayment.Amount,
