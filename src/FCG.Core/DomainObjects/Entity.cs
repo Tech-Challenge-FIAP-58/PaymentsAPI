@@ -4,12 +4,17 @@ namespace FCG.Core.DomainObjects
 {
     public abstract class Entity
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
+        public bool IsDeleted { get; protected set; } = false;
+        public DateTime CreatedAt { get; protected set; }
+        public DateTime? UpdatedAt { get; protected set; }
+        public DateTime? DeletedAt { get; protected set; }
 
-        //protected Entity()
-        //{
-        //    Id = Guid.NewGuid();
-        //}
+        protected Entity()
+        {
+            Id = Guid.NewGuid();
+            CreatedAt = DateTime.UtcNow;
+        }
 
         private List<Event> _notificacoes;
 

@@ -7,11 +7,11 @@ namespace FCG.Payments.Models;
 
 public class Payment : Entity
 {
-    public int OrderId { get; set; }
+    public Guid OrderId { get; set; }
     public PaymentMethod PaymentMethod { get; set; }
     public decimal Amount { get; set; }
-
     public CreditCard CreditCard { get; set; }
+    public PaymentStatus Status { get; private set; }
 
     // EF Relation
     public ICollection<Transaction> Transactions { get; set; }
@@ -22,7 +22,7 @@ public class Payment : Entity
     }
 
     public Payment(
-        int orderId,
+        Guid orderId,
         PaymentMethod paymentMethod,
         decimal amount,
         CreditCard creditCard)
@@ -32,6 +32,7 @@ public class Payment : Entity
         Amount = amount;
         CreditCard = creditCard;
         Transactions = new List<Transaction>();
+        Status = PaymentStatus.Pending;
     }
 
     public void AddTransaction(Transaction transaction)

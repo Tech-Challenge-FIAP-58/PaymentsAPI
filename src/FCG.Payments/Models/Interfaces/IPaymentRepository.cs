@@ -4,7 +4,7 @@
     {
         void AddPayment(Payment payment);
         void AddTransaction(Transaction transaction);
-        Task<Payment> GetPaymentByOrderId(int orderId);
-        Task<IEnumerable<Transaction>> GetTransactionsByOrderId(int orderId);
+        Task<IEnumerable<Payment>> GetPaymentByOrderId(Guid orderId);
+        Task<IEnumerable<Transaction>> GetTransactionsByOrderId(Guid orderId);
     }
 }

@@ -14,7 +14,7 @@ public class Transaction : Entity
     public string Tid { get; set; } // Transaction Identifier
     public string Nsu { get; set; } // Sequential Network Number (Comum em gateways)
 
-    public int PaymentId { get; set; }
+    public Guid PaymentId { get; set; }
 
     // EF Relation
     public Payment Payment { get; set; }

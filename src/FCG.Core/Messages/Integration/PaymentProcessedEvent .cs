@@ -2,15 +2,15 @@
 
 public class PaymentProcessedEvent : IntegrationEvent
 {
-    public int OrderId { get; }
-    public int PaymentId { get; }
+    public Guid OrderId { get; }
+    public Guid PaymentId { get; }
     public decimal Amount { get; }
     public PaymentResultStatus Status { get; }
     public string? Reason { get; }
 
     public PaymentProcessedEvent(
-        int orderId,
-        int paymentId,
+        Guid orderId,
+        Guid paymentId,
         decimal amount,
         PaymentResultStatus status,
         string? reason = null)

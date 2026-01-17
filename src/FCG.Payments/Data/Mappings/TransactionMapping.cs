@@ -13,6 +13,10 @@ namespace FCG.Payments.Data.Mappings
             builder.Property(c => c.Id)
                 .ValueGeneratedOnAdd();
 
+            builder.Property(c => c.Status)
+                .IsRequired()
+                .HasConversion<string>();
+
             builder.HasOne(c => c.Payment)
                 .WithMany(c => c.Transactions);
 

@@ -13,8 +13,21 @@ namespace FCG.Payments.Data.Mappings
             builder.Property(c => c.Id)
                 .ValueGeneratedOnAdd();
 
-            //builder.HasIndex(p => p.OrderId)
-            //    .IsUnique();
+            builder.Property(c => c.Status)
+                .IsRequired()
+                .HasConversion<string>();
+
+            builder.Property(c => c.PaymentMethod)
+                .IsRequired()
+                .HasConversion<string>();
+
+            builder.HasIndex(p => p.OrderId)
+                   .HasDatabaseName("IX_Payment_OrderId");
+
+            // Cria um indice único no OrderId, mas aplica um filtro SQL (WHERE)
+            builder.HasIndex(p => p.OrderId)
+                .IsUnique()
+                .HasFilter("[Status] = 'Approved'");
 
             builder.Ignore(c => c.CreditCard);
 
