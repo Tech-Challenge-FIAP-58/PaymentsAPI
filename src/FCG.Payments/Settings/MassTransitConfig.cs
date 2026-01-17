@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace FCG.Payments.Configuration
 {
-    public static class MassTransitSettings
+    public static class MassTransitConfig
     {
         public static HostApplicationBuilder AddMassTransitSettings(this HostApplicationBuilder builder)
         {
