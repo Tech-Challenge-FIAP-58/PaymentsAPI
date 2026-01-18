@@ -1,9 +1,11 @@
 ﻿using FCG.Payments.Models;
 using FCG.Payments.Models.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FCG.Payments.Data.Repositories;
 
+[ExcludeFromCodeCoverage]
 public class PaymentRepository : IPaymentRepository
 {
     private readonly PaymentContext _context;

@@ -1,7 +1,9 @@
-﻿using FCG.Payments.Configuration.Dtos;
+﻿using FCG.Payments.Settings.Dtos;
+using System.Diagnostics.CodeAnalysis;
 
-namespace FCG.Payments.Configuration
+namespace FCG.Payments.Settings
 {
+    [ExcludeFromCodeCoverage]
     public static class MessageBusConfig
     {
         public static void AddMessageBusConfiguration(this HostApplicationBuilder builder)

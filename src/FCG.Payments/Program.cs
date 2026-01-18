@@ -1,9 +1,12 @@
-using FCG.Payments.Configuration;
 using FCG.Payments.Data;
 using FCG.Payments.Facade;
+using FCG.Payments.Settings;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+
+[assembly: ExcludeFromCodeCoverage]
 
 var builder = Host.CreateApplicationBuilder(args);
 

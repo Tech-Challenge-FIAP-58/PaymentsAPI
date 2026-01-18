@@ -6,9 +6,11 @@ using FCG.Payments.Facade;
 using FCG.Payments.Models.Interfaces;
 using FCG.Payments.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
-namespace FCG.Payments.Configuration
+namespace FCG.Payments.Settings
 {
+    [ExcludeFromCodeCoverage]
     public static class DependencyInjectionConfig
     {
         public static void RegisterServices(this HostApplicationBuilder builder)

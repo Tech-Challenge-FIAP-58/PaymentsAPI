@@ -34,6 +34,7 @@ namespace FCG.Payments.Facade
             var transaction = new TransactionFake(paymentService)
             {
                 CardHash = cardHash,
+                CardBrand = "Mastercard",
                 CardNumber = payment.CreditCard.CardNumber,
                 CardHolderName = payment.CreditCard.CardName,
                 CardExpirationDate = payment.CreditCard.CardExpirationDate,

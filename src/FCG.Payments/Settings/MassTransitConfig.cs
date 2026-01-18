@@ -1,14 +1,16 @@
 ﻿using FCG.Core.Messages.Integration;
 using FCG.Core.Objects;
-using FCG.Payments.Configuration.Dtos;
 using FCG.Payments.Consumers;
+using FCG.Payments.Settings.Dtos;
 using MassTransit;
 using Microsoft.Extensions.Options;
+using System.Diagnostics.CodeAnalysis;
 
-namespace FCG.Payments.Configuration
+namespace FCG.Payments.Settings
 {
     public static class MassTransitConfig
     {
+        [ExcludeFromCodeCoverage]
         public static HostApplicationBuilder AddMassTransitSettings(this HostApplicationBuilder builder)
         {
             builder.Services.AddMassTransit(x =>

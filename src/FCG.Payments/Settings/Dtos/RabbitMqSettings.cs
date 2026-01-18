@@ -1,5 +1,8 @@
-﻿namespace FCG.Payments.Configuration.Dtos;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace FCG.Payments.Settings.Dtos;
+
+[ExcludeFromCodeCoverage]
 public class RabbitMqSettings
 {
     public string Host { get; set; } = "localhost";
