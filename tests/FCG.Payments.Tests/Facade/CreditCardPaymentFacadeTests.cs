@@ -1,7 +1,7 @@
 using FCG.FakePaymentProvider.Enums;
+using FCG.Payments.Domain.Entities;
+using FCG.Payments.Domain.Entities.Enums;
 using FCG.Payments.Facade;
-using FCG.Payments.Models;
-using FCG.Payments.Models.Enums;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -120,7 +120,6 @@ public class CreditCardPaymentFacadeTests
         nullConfigMock.Setup(x => x.Value).Returns((PaymentConfig)null!);
 
         // Act & Assert
-        // A exceção será lançada quando tentar usar o facade, não no construtor
         var facade = new CreditCardPaymentFacade(nullConfigMock.Object);
         facade.Should().NotBeNull(); // O construtor em si funciona
     }

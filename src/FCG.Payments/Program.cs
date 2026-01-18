@@ -1,6 +1,6 @@
-using FCG.Payments.Data;
 using FCG.Payments.Facade;
-using FCG.Payments.Settings;
+using FCG.Payments.Infrastructure.Persistence;
+using FCG.Payments.Infrastructure.Settings;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;

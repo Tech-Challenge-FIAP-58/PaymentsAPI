@@ -1,4 +1,4 @@
-using FCG.Payments.Models;
+using FCG.Payments.Domain.Entities;
 using FluentAssertions;
 
 namespace FCG.Payments.Test.Models;

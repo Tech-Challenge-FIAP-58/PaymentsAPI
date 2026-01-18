@@ -1,9 +1,9 @@
-﻿using FCG.Core.Messages.Integration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Hosting;
-using MassTransit;
 using FGC.Publisher.Test;
+using MassTransit;
+using FCG.Core.Contracts;
 
 
 var host = Host.CreateDefaultBuilder(args)

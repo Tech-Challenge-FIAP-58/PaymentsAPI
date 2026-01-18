@@ -1,12 +1,12 @@
-using FCG.Core.Data.Interfaces;
-using FCG.Core.Mediator;
-using FCG.Core.Messages.Integration;
-using FCG.Payments.Domain.Contracts;
+using FCG.Core.Contracts;
+using FCG.Payments.Application.Interfaces;
+using FCG.Payments.Application.Mediator;
+using FCG.Payments.Application.Services;
+using FCG.Payments.Domain.Entities;
+using FCG.Payments.Domain.Entities.Enums;
+using FCG.Payments.Domain.Entities.Interfaces;
+using FCG.Payments.Domain.Events;
 using FCG.Payments.Facade;
-using FCG.Payments.Models;
-using FCG.Payments.Models.Enums;
-using FCG.Payments.Models.Interfaces;
-using FCG.Payments.Services;
 using FluentAssertions;
 using Moq;
 

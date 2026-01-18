@@ -1,4 +1,4 @@
-﻿using FCG.Payments.Models;
+﻿using FCG.Payments.Domain.Entities;
 
 namespace FCG.Payments.Facade
 {

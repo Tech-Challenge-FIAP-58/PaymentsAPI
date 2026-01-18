@@ -116,7 +116,7 @@ namespace FCG.FakePaymentProvider
             transaction = new TransactionFake
             {
                 AuthorizationCode = "",
-                CardBrand = "",
+                CardBrand = "MasterCard",
                 TransactionDate = DateTime.Now,
                 Cost = 0,
                 Amount = 0,

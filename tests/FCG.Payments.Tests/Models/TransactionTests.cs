@@ -1,5 +1,5 @@
-using FCG.Payments.Models;
-using FCG.Payments.Models.Enums;
+using FCG.Payments.Domain.Entities;
+using FCG.Payments.Domain.Entities.Enums;
 using FluentAssertions;
 
 namespace FCG.Payments.Test.Models;

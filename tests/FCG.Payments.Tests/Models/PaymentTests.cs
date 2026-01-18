@@ -1,7 +1,7 @@
-using FCG.Core.Messages.Integration;
-using FCG.Payments.Domain.Contracts;
-using FCG.Payments.Models;
-using FCG.Payments.Models.Enums;
+using FCG.Core.Contracts;
+using FCG.Payments.Domain.Entities;
+using FCG.Payments.Domain.Entities.Enums;
+using FCG.Payments.Domain.Events;
 using FluentAssertions;
 
 namespace FCG.Payments.Test.Models;

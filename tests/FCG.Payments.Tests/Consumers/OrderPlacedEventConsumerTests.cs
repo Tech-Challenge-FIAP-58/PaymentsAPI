@@ -1,6 +1,6 @@
-using FCG.Core.Messages.Integration;
+using FCG.Core.Contracts;
+using FCG.Payments.Application.Services;
 using FCG.Payments.Consumers;
-using FCG.Payments.Services;
 using FluentAssertions;
 using MassTransit;
 using Moq;

@@ -1,5 +1,5 @@
-using FCG.Core.Messages.Integration;
-using FCG.Payments.Services;
+using FCG.Core.Contracts;
+using FCG.Payments.Application.Services;
 using MassTransit;
 
 namespace FCG.Payments.Consumers;

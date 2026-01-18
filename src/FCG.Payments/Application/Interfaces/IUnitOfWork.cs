@@ -1,0 +1,8 @@
+﻿namespace FCG.Payments.Application.Interfaces;
+
+public interface IUnitOfWork
+{
+    Task BeginTransactionAsync(CancellationToken cancellationToken = default);
+    Task RollBackTransactionAsync(CancellationToken cancellationToken = default);
+    Task<bool> CommitAsync(CancellationToken cancellationToken = default);
+}

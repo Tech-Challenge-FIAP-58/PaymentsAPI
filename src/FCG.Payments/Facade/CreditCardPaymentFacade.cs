@@ -1,8 +1,8 @@
 ﻿using FCG.FakePaymentProvider.Enums;
 using Microsoft.Extensions.Options;
-using FCG.Payments.Models.Enums;
 using FCG.FakePaymentProvider;
-using FCG.Payments.Models;
+using FCG.Payments.Domain.Entities;
+using FCG.Payments.Domain.Entities.Enums;
 
 namespace FCG.Payments.Facade
 {
@@ -34,7 +34,7 @@ namespace FCG.Payments.Facade
             var transaction = new TransactionFake(paymentService)
             {
                 CardHash = cardHash,
-                CardBrand = "Mastercard",
+                CardBrand = "",
                 CardNumber = payment.CreditCard.CardNumber,
                 CardHolderName = payment.CreditCard.CardName,
                 CardExpirationDate = payment.CreditCard.CardExpirationDate,

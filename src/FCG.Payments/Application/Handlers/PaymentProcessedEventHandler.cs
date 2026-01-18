@@ -1,5 +1,5 @@
-﻿using FCG.Core.Messages.Integration;
-using FCG.Payments.Domain.Contracts;
+﻿using FCG.Payments.Domain.Events;
+using FCG.Core.Contracts;
 using MassTransit;
 using MediatR;
 
