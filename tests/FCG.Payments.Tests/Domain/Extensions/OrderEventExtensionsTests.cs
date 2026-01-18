@@ -12,7 +12,7 @@ public class OrderEventExtensionsTests
     {
         // Arrange
         var orderId = Guid.NewGuid();
-        var customerId = Guid.NewGuid();
+        var customerId = 1;
         var orderPlacedEvent = new OrderPlacedEvent(
             customerId,
             orderId,
@@ -40,7 +40,7 @@ public class OrderEventExtensionsTests
     {
         // Arrange
         var orderPlacedEvent = new OrderPlacedEvent(
-            Guid.NewGuid(),
+            1,
             Guid.NewGuid(),
             (int)PaymentMethod.CreditCard,
             200m,
@@ -65,7 +65,7 @@ public class OrderEventExtensionsTests
     {
         // Arrange
         var orderPlacedEvent = new OrderPlacedEvent(
-            Guid.NewGuid(),
+            1,
             Guid.NewGuid(),
             (int)PaymentMethod.CreditCard,
             99.99m,
@@ -87,7 +87,7 @@ public class OrderEventExtensionsTests
     {
         // Arrange
         var orderPlacedEvent = new OrderPlacedEvent(
-            Guid.NewGuid(),
+            1,
             Guid.NewGuid(),
             (int)PaymentMethod.CreditCard,
             99.99m,
@@ -112,7 +112,7 @@ public class OrderEventExtensionsTests
     {
         // Arrange
         var orderPlacedEvent = new OrderPlacedEvent(
-            Guid.NewGuid(),
+            1,
             Guid.NewGuid(),
             paymentMethodValue,
             99.99m,

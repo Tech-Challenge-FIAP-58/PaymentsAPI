@@ -201,7 +201,7 @@ public class PaymentServiceTests
     private static OrderPlacedEvent CreateOrderPlacedEvent(Guid orderId)
     {
         return new OrderPlacedEvent(
-            Guid.NewGuid(),
+            1,
             orderId,
             1,
             100m,

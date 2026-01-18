@@ -44,7 +44,7 @@ public class OrderPlacedEventConsumerTests
         // Arrange
         var orderId = Guid.NewGuid();
         var orderPlacedEvent = new OrderPlacedEvent(
-            Guid.NewGuid(),
+            1,
             orderId,
             1,
             100m,
@@ -90,7 +90,7 @@ public class OrderPlacedEventConsumerTests
     private static OrderPlacedEvent CreateOrderPlacedEvent()
     {
         return new OrderPlacedEvent(
-            Guid.NewGuid(),
+            1,
             Guid.NewGuid(),
             1,
             100m,

@@ -41,7 +41,7 @@ await host.StartAsync();
 var bus = host.Services.GetRequiredService<IBus>();
 
 var message = new OrderPlacedEvent(
-    clientId: new Guid(),
+    clientId: 1,
     orderId: new Guid(),
     paymentMethod: 1,
     amount: 250.75m,

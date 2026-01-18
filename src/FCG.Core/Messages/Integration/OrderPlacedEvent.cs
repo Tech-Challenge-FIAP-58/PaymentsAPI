@@ -2,7 +2,7 @@
 
 public class OrderPlacedEvent : IntegrationEvent
 {
-    public Guid ClientId { get; set; }
+    public int ClientId { get; set; }
     public Guid OrderId { get; set; }
     public int PaymentMethod { get; set; }
     public decimal Amount { get; set; }
@@ -11,7 +11,7 @@ public class OrderPlacedEvent : IntegrationEvent
     public string ExpirationDate { get; set; }
     public string Cvv { get; set; }
 
-    public OrderPlacedEvent(Guid clientId, Guid orderId, int paymentMethod, decimal amount, string cardName,
+    public OrderPlacedEvent(int clientId, Guid orderId, int paymentMethod, decimal amount, string cardName,
     string cardNumber, string expirationDate, string cvv)
     {
         ClientId = clientId;
