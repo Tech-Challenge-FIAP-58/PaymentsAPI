@@ -11,7 +11,7 @@ using System.Reflection;
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.Configure<PaymentConfig>(builder.Configuration.GetSection("PaymentConfig"));
-
+ 
 builder.RegisterServices();
 
 builder.AddMessageBusConfiguration();
