@@ -51,6 +51,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\src\FCG.Core\FCG.Core.csproj" />
 		<ProjectReference Include="..\..\src\FCG.Payments\FCG.Payments.csproj" />
 	</ItemGroup>
 
