@@ -1,4 +1,4 @@
-using FCG.Core.Contracts;
+using FCG.Core.Integration;
 using FCG.Payments.Application.Services;
 using MassTransit;
 

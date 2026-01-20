@@ -1,4 +1,4 @@
-﻿namespace FCG.Core.Contracts;
+﻿namespace FCG.Core.Integration;
 
 public class OrderPlacedEvent
 {

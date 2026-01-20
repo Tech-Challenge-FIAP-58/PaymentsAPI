@@ -1,12 +1,12 @@
 ﻿using FCG.Payments.Facade;
 using FCG.Payments.Application.Mediator;
-using FCG.Core.Contracts;
 using FCG.Payments.Domain.Events;
 using FCG.Payments.Application.Extensions;
 using FCG.Payments.Domain.Entities.Interfaces;
 using FCG.Payments.Domain.Entities.Enums;
 using FCG.Payments.Domain.Entities;
 using FCG.Payments.Application.Interfaces;
+using FCG.Core.Integration;
 
 namespace FCG.Payments.Application.Services;
 

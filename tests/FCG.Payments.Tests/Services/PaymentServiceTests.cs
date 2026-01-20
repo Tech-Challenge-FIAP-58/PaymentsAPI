@@ -1,4 +1,4 @@
-using FCG.Core.Contracts;
+using FCG.Core.Integration;
 using FCG.Payments.Application.Interfaces;
 using FCG.Payments.Application.Mediator;
 using FCG.Payments.Application.Services;

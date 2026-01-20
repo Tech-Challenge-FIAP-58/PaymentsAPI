@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Hosting;
 using FGC.Publisher.Test;
 using MassTransit;
-using FCG.Core.Contracts;
+using FCG.Core.Integration;
 
 
 var host = Host.CreateDefaultBuilder(args)

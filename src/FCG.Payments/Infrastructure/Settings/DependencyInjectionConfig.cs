@@ -1,12 +1,12 @@
-﻿using FCG.Payments.Application.Interfaces;
+﻿using FCG.Payments.Infrastructure.Persistence.Repositories;
+using FCG.Payments.Domain.Entities.Interfaces;
+using FCG.Payments.Infrastructure.Persistence;
+using FCG.Payments.Application.Interfaces;
 using FCG.Payments.Application.Mediator;
 using FCG.Payments.Application.Services;
-using FCG.Payments.Domain.Entities.Interfaces;
-using FCG.Payments.Facade;
-using FCG.Payments.Infrastructure.Persistence;
-using FCG.Payments.Infrastructure.Persistence.Repositories;
-using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
+using FCG.Payments.Facade;
 
 namespace FCG.Payments.Infrastructure.Settings
 {

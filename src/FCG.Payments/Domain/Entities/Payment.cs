@@ -1,4 +1,4 @@
-﻿using FCG.Core.Contracts;
+﻿using FCG.Core.Integration;
 using FCG.Payments.Domain.Entities.Enums;
 using FCG.Payments.Domain.Events;
 
