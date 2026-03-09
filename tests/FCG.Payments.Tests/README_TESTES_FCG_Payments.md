@@ -126,11 +126,13 @@ coveragereport/index.html
 
 ## 🧪 O que deve ser testado
 
--   Domain
+-   Domain (entidades e regras de negócio)
+-   Domain Events (verificação de eventos gerados pelas entidades)
 -   Application / UseCases
 -   CommandHandlers
 -   EventHandlers
 -   Services com regra de negócio
+-   Event Sourcing (ciclo de vida dos domain events)
 
 ------------------------------------------------------------------------
 
@@ -150,8 +152,27 @@ Já excluídos automaticamente:
 
 ## 🧱 Estrutura esperada
 
-FCG.Payments.Test ├── Tests │ ├── Domain │ ├── Application │ ├──
-Handlers │ ├── Services └── README.md
+```
+FCG.Payments.Tests
+├── Domain
+│   ├── Extensions
+│   │   └── OrderEventExtensionsTests.cs
+│   └── Models
+│       └── PaymentTests.cs
+├── Application
+├── Handlers
+├── Services
+└── README_TESTES_FCG_Payments.md
+```
+
+## 📦 Domain Events cobertos pelos testes
+
+| Evento | Gerado em | Testado em |
+|--------|-----------|------------|
+| `PaymentCreatedDomainEvent` | `Payment` construtor | `PaymentTests` |
+| `PaymentAttemptFailedDomainEvent` | `Payment.AddTransaction()` | `PaymentTests` |
+| `PaymentProcessedDomainEvent` | `Payment.Process()` | `PaymentTests` |
+| `PaymentRefundedDomainEvent` | `Payment.Refund()` | `PaymentTests` |
 
 ------------------------------------------------------------------------
 

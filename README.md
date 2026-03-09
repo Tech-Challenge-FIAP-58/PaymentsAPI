@@ -1,141 +1,195 @@
-# FCG Payments - Microserviço de Pagamentos
+# FCG Payments - Microservico de Pagamentos
 
 ![.NET 8](https://img.shields.io/badge/.NET-8.0-purple?style=flat-square&logo=dotnet)
 ![Worker Service](https://img.shields.io/badge/Worker-Service-blue?style=flat-square)
 ![MassTransit](https://img.shields.io/badge/MassTransit-8.5.7-orange?style=flat-square)
 ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-Message%20Bus-red?style=flat-square)
 ![SQL Server](https://img.shields.io/badge/SQL%20Server-Database-yellow?style=flat-square)
+![Event Sourcing](https://img.shields.io/badge/Event%20Sourcing-Enabled-green?style=flat-square)
 
-## Índice
+## Indice
 
 - [Sobre o Projeto](#sobre-o-projeto)
 - [Arquitetura](#arquitetura)
 - [Funcionalidades](#funcionalidades)
+- [Event Sourcing](#event-sourcing)
 - [Tecnologias](#tecnologias)
-- [Pré-requisitos](#pré-requisitos)
-- [Configuração](#configuração)
-- [Variáveis de Ambiente](#variáveis-de-ambiente)
-- [Execução](#execução)
+- [Pre-requisitos](#pre-requisitos)
+- [Configuracao](#configuracao)
+- [Variaveis de Ambiente](#variaveis-de-ambiente)
+- [Execucao](#execucao)
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [Fluxo de Processamento](#fluxo-de-processamento)
 - [Eventos e Mensageria](#eventos-e-mensageria)
+- [Modelo de Dados](#modelo-de-dados)
 - [Testes](#testes)
-- [Segurança](#segurança)
+- [Seguranca](#seguranca)
 - [Contribuindo](#contribuindo)
-- [Licença](#licença)
-- [Autores](#autores)
-- [Suporte](#suporte)
 
 ## Sobre o Projeto
 
-O **FCG Payments** é um microserviço de processamento de pagamentos desenvolvido em **.NET 8** utilizando o template **Worker Service**. Faz parte de uma arquitetura de microserviços orientada a eventos, responsável por processar transações de pagamento com cartão de crédito de forma assíncrona.
+O **FCG Payments** e um microservico de processamento de pagamentos desenvolvido em **.NET 8** utilizando o template **Worker Service**. Faz parte de uma arquitetura de microservicos orientada a eventos, responsavel por processar transacoes de pagamento com cartao de credito de forma assincrona.
 
 ### Finalidade
 
 - Processar pagamentos de pedidos recebidos via message broker (RabbitMQ).
-- Gerenciar transações de cartão de crédito com retry automático.
-- Persistir dados de pagamentos e transações em banco SQL Server.
-- Publicar eventos de pagamentos processados para outros microserviços.
-- Garantir resiliência com políticas de retry e tratamento de falhas.
+- Gerenciar transacoes de cartao de credito com retry automatico.
+- Persistir dados de pagamentos e transacoes em banco SQL Server.
+- Registrar o ciclo de vida completo dos pagamentos via **Event Sourcing**.
+- Publicar eventos de pagamentos processados para outros microservicos.
+- Garantir resiliencia com politicas de retry e tratamento de falhas.
 
 ## Arquitetura
 
-O microserviço segue princípios de Clean Architecture e Domain-Driven Design (DDD), com separação clara de responsabilidades.
-
-Arquitetura simplificada:
-
-```
-+---------------------------------------------+
-|               FCG.Payments Service          |
-+---------------------------------------------+
-                |
-    +---------------------------+
-    |        Infra / Broker     |
-    |  RabbitMQ  <->  SQL Server|
-    +---------------------------+
-                |
- +----------------+     +-----------------+
- | Orders Service |     | Payments Service|
- +----------------+     +-----------------+
-```
+O microservico segue principios de **Clean Architecture** e **Domain-Driven Design (DDD)**, com separacao clara de responsabilidades e implementacao do padrao **Event Sourcing**.
 
 ### Camadas
 
-- **Application**: Handlers de eventos e orquestração.
-- **Domain**: Entidades, enums e contratos de domínio.
-- **Data**: Contexto EF Core, repositórios e mapeamentos.
-- **Services**: Lógica de negócio de processamento de pagamentos.
-- **Facade**: Abstração do provedor de pagamento.
-- **Consumers**: Consumidores de mensagens do RabbitMQ.
+| Camada | Responsabilidade |
+|--------|------------------|
+| **Domain** | Entidades, domain events, enums, regras de negocio |
+| **Domain/EventSourcing** | Contratos do event store (StoredEvent, IEventStoreRepository) |
+| **Application** | Handlers MediatR, servicos de aplicacao, mediator |
+| **Infrastructure/Persistence** | EF Core, repositorios, PaymentContext (persiste eventos atomicamente) |
+| **Infrastructure/EventSourcing** | EventStoreRepository (consultas ao event store) |
+| **Facade** | Abstracao do provedor de pagamento externo |
+| **Consumers** | Consumidores de mensagens RabbitMQ |
 
 ## Funcionalidades
 
 ### 1. Processamento de Pagamentos
 - Consumo de eventos `OrderPlacedEvent` do RabbitMQ.
-- Processamento de pagamentos com cartão de crédito.
-- Tentativas automáticas (configuráveis) em caso de falha.
-- Validação de pagamentos já processados (idempotência).
+- Processamento de pagamentos com cartao de credito.
+- Tentativas automaticas (ate 3x) em caso de falha no gateway.
+- Validacao de pagamentos ja processados (idempotencia).
 
-### 2. Gerenciamento de Transações
-- Criação de transações com status (Authorized/Denied).
-- Armazenamento de detalhes da transação (NSU, TID, código de autorização).
-- Histórico de tentativas.
+### 2. Gerenciamento de Transacoes
+- Criacao de transacoes com status (Authorized / Declined).
+- Armazenamento de detalhes da transacao (NSU, TID, codigo de autorizacao).
+- Historico completo de tentativas.
 
-### 3. Persistência de Dados
+### 3. Persistencia de Dados
 - Banco de dados SQL Server com Entity Framework Core.
-- Migrations automáticas com retry na inicialização.
-- Unit of Work para consistência transacional.
+- Migrations automaticas com retry na inicializacao.
+- Unit of Work para consistencia transacional.
+- Tabela `StoredEvents` para auditoria imutavel dos domain events.
 
 ### 4. Mensageria
 - Consumo de eventos `OrderPlacedEvent`.
-- Publicação de eventos `PaymentProcessedEvent`.
-- Política de retry configurável para mensagens.
-- Dead Letter Queue automática (MassTransit).
+- Publicacao de eventos `PaymentProcessedEvent` e `PaymentRefundedEvent`.
+- Politica de retry configuravel para mensagens.
+- Dead Letter Queue automatica (MassTransit).
 
-### 5. Integração com Provedor de Pagamento
-- Integração com `FCG.FakePaymentProvider` (simulador).
-- Criptografia de dados do cartão (CardHash).
-- Suporte a múltiplas bandeiras de cartão.
+### 5. Event Sourcing
+- Todos os domain events sao serializados em JSON e gravados na tabela `StoredEvents`.
+- Persistencia atomica: Payment + StoredEvent salvos na mesma transacao SQL.
+- Publicacao no RabbitMQ somente apos confirmacao do banco.
+- Ciclo de vida completo do Payment rastreado: criacao, tentativas falhas, resultado final e estorno.
+
+### 6. Integracao com Provedor de Pagamento
+- Integracao com `FCG.FakePaymentProvider` (simulador).
+- Criptografia de dados do cartao (CardHash).
+- Suporte a multiplas bandeiras de cartao.
+
+## Event Sourcing
+
+O servico implementa o padrao **Event Sourcing** para rastreabilidade completa do ciclo de vida dos pagamentos.
+
+### Ciclo de vida do Payment
+
+```
+Payment criado       ->  PaymentCreatedDomainEvent         -> StoredEvents
+Tentativa falhou     ->  PaymentAttemptFailedDomainEvent   -> StoredEvents
+Aprovado / Negado    ->  PaymentProcessedDomainEvent       -> StoredEvents + RabbitMQ
+Estornado            ->  PaymentRefundedDomainEvent        -> StoredEvents + RabbitMQ
+```
+
+### Onde cada evento e gerado
+
+```csharp
+// Payment.cs - construtor
+AddEvent(new PaymentCreatedDomainEvent(orderId, Id, amount, paymentMethod));
+
+// Payment.cs - AddTransaction(): cada tentativa negada
+if (transaction.Status != TransactionStatus.Authorized)
+    AddEvent(new PaymentAttemptFailedDomainEvent(OrderId, Id, transaction.Id, transaction.Status));
+
+// Payment.cs - Process(): resultado final
+AddEvent(new PaymentProcessedDomainEvent(...));
+
+// Payment.cs - Refund(): valida que so aprovados podem ser estornados
+if (Status != PaymentStatus.Approved) throw new DomainException(...);
+AddEvent(new PaymentRefundedDomainEvent(OrderId, Id, Amount, reason));
+```
+
+### Fluxo de persistencia atomica
+
+```
+UnitOfWork.CommitAsync()
+  |
+  PaymentContext.SaveChangesAsync()
+        |-- Coleta domain events das entidades rastreadas
+        |-- Serializa cada evento -> StoredEvent (JSON)
+        |-- base.SaveChangesAsync()  <- Payment + StoredEvents na mesma transacao
+        |-- _mediatorHandler.PublishEvent()  <- so apos o commit do banco
+```
+
+### Tabela StoredEvents
+
+| Campo | Tipo | Descricao |
+|-------|------|-----------|
+| `Id` | UNIQUEIDENTIFIER | Identificador unico do registro |
+| `AggregateId` | UNIQUEIDENTIFIER | Id do agregado (ex: Payment.Id) |
+| `AggregateType` | VARCHAR(100) | Tipo do agregado (ex: Payment) |
+| `EventType` | VARCHAR(100) | Tipo do evento (ex: PaymentProcessedDomainEvent) |
+| `Payload` | NVARCHAR(MAX) | Dados do evento serializados em JSON |
+| `OccurredOn` | DATETIME2 | Timestamp UTC do evento |
+
+### Consultando o historico
+
+```csharp
+// Por agregado (historico de um pagamento especifico)
+var eventos = await _eventStoreRepository.GetEventsByAggregateId(paymentId);
+
+// Por tipo de evento (todos os estornos, por exemplo)
+var estornos = await _eventStoreRepository.GetEventsByType(nameof(PaymentRefundedDomainEvent));
+```
+
+### Aplicar migration
+
+```bash
+dotnet ef database update --project src/FCG.Payments
+```
 
 ## Tecnologias
 
-### Core
-- .NET 8.0
-- C# 12
-- Worker Service
+| Tecnologia | Versao | Uso |
+|------------|--------|-----|
+| .NET | 8.0 | Runtime |
+| C# | 12 | Linguagem |
+| MassTransit | 8.5.7 | Mensageria RabbitMQ |
+| Entity Framework Core | 8.0.12 | ORM / Migrations |
+| MediatR | 8.0 | Mediator pattern / Domain events |
+| SQL Server | - | Banco de dados |
+| Docker | - | Containerizacao |
 
-### Bibliotecas e Infra
-- MassTransit 8.5.7
-- MassTransit.RabbitMQ
-- Entity Framework Core 8.0
-- MediatR
-- SQL Server
-- Docker
+## Pre-requisitos
 
-## Pré-requisitos
-
-### Desenvolvimento
 - .NET SDK 8.0 ou superior
 - SQL Server 2019+ ou LocalDB
 - RabbitMQ 3.x
-- Visual Studio 2022 / VS Code / Rider
+- Docker 20.10+ e Docker Compose 2.0+ (opcional)
 
-### Docker
-- Docker 20.10+
-- Docker Compose 2.0+
+## Configuracao
 
-## Configuração
-
-### 1. Clone o repositório
+### 1. Clone o repositorio
 
 ```bash
 git clone https://github.com/Tech-Challenge-FIAP-58/PaymentsAPI.git
 cd App.Payments
 ```
 
-### 2. Configure `appsettings.json`
-
-Exemplo de `src/FCG.Payments/appsettings.json`:
+### 2. Configure appsettings.json
 
 ```json
 {
@@ -156,96 +210,46 @@ Exemplo de `src/FCG.Payments/appsettings.json`:
   "RetrySettings": {
     "MaxRetryAttempts": 5,
     "DelayBetweenRetriesInSeconds": 10
-  },
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.Hosting.Lifetime": "Information"
-    }
   }
 }
 ```
 
-### 3. Variáveis de ambiente (produção)
-
-Use variáveis de ambiente em vez de commitar segredos:
+### 3. Aplicar migrations
 
 ```bash
-# Linux/Mac
-export ConnectionStrings__Core="Server=sqlserver;Database=FGC.Payments;User Id=sa;Password=..."
-export RabbitMQ__Host="rabbitmq"
-export RabbitMQ__Username="admin"
-export RabbitMQ__Password="admin123"
-export PaymentConfig__DefaultApiKey="your-api-key"
-export PaymentConfig__DefaultEncryptionKey="your-encryption-key"
-export RetrySettings__MaxRetryAttempts=5
-export RetrySettings__DelayBetweenRetriesInSeconds=10
+dotnet ef database update --project src/FCG.Payments
 ```
 
-## Variáveis de Ambiente
+## Variaveis de Ambiente
 
-### Obrigatórias
+### Obrigatorias
 
-| Variável | Descrição | Exemplo |
-|----------|-----------|---------|
-| `ConnectionStrings__Core` | String de conexão SQL Server | `Server=localhost;Database=FGC.Payments;User Id=sa;Password=Pass@123;TrustServerCertificate=True` |
-| `RabbitMQ__Host` | Host do RabbitMQ | `localhost` ou `rabbitmq` |
-| `RabbitMQ__Username` | Usuário RabbitMQ | `guest` |
-| `RabbitMQ__Password` | Senha RabbitMQ | `guest` |
-| `PaymentConfig__DefaultApiKey` | API Key do provedor de pagamento | `your-api-key-here` |
-| `PaymentConfig__DefaultEncryptionKey` | Chave de criptografia | `your-encryption-key-here` |
+| Variavel | Descricao |
+|----------|-----------|
+| `ConnectionStrings__Core` | String de conexao SQL Server |
+| `RabbitMQ__Host` | Host do RabbitMQ |
+| `RabbitMQ__Username` | Usuario RabbitMQ |
+| `RabbitMQ__Password` | Senha RabbitMQ |
+| `PaymentConfig__DefaultApiKey` | API Key do provedor de pagamento |
+| `PaymentConfig__DefaultEncryptionKey` | Chave de criptografia |
 
 ### Opcionais
 
-| Variável | Descrição | Padrão | Exemplo |
-|----------|-----------|--------|---------|
-| `RabbitMQ__VirtualHost` | Virtual host RabbitMQ | `/` | `/payments` |
-| `RabbitMQ__Port` | Porta RabbitMQ | `5672` | `5672` |
-| `RetrySettings__MaxRetryAttempts` | Máximo de tentativas de retry | `5` | `10` |
-| `RetrySettings__DelayBetweenRetriesInSeconds` | Delay entre retries (segundos) | `10` | `15` |
-| `Logging__LogLevel__Default` | Nível de log padrão | `Information` | `Debug` |
+| Variavel | Padrao |
+|----------|--------|
+| `RabbitMQ__VirtualHost` | `/` |
+| `RabbitMQ__Port` | `5672` |
+| `RetrySettings__MaxRetryAttempts` | `5` |
+| `RetrySettings__DelayBetweenRetriesInSeconds` | `10` |
 
-### Exemplo Docker Compose (trecho)
-
-```yaml
-version: '3.8'
-services:
-  fcg-payments:
-    image: fcg-payments:latest
-    environment:
-      - ConnectionStrings__Core=Server=sqlserver;Database=FGC.Payments;User Id=sa;Password=Pass@123;TrustServerCertificate=True
-      - RabbitMQ__Host=rabbitmq
-      - RabbitMQ__Username=admin
-      - RabbitMQ__Password=admin123
-      - PaymentConfig__DefaultApiKey=your-api-key-16chars
-      - PaymentConfig__DefaultEncryptionKey=your-encrypt-16chars
-      - RetrySettings__MaxRetryAttempts=5
-      - RetrySettings__DelayBetweenRetriesInSeconds=10
-    depends_on:
-      - sqlserver
-      - rabbitmq
-```
-
-## Execução
+## Execucao
 
 ### Desenvolvimento local
 
 ```bash
 dotnet restore
-cd src/FCG.Payments
-dotnet ef database update
-dotnet run
-```
-
-### Docker
-
-```bash
-docker build -t fcg-payments:latest -f src/FCG.Payments/Dockerfile .
-docker run -d \
-  -e ConnectionStrings__Core="Server=sqlserver;..." \
-  -e RabbitMQ__Host="rabbitmq" \
-  --name fcg-payments \
-  fcg-payments:latest
+dotnet ef database update --project src/FCG.Payments
+dotnet run --project src/FCG.Payments
 ```
 
 ### Docker Compose (recomendado)
@@ -261,61 +265,128 @@ docker-compose down
 ```
 FCG.Payments/
   src/
-    FCG.Payments/                    # Microserviço principal
+    FCG.Payments/
       Application/
-        Handlers/                    # Event handlers (MediatR)
-      Consumers/                     # Consumidores RabbitMQ
-      Data/
-        Mappings/
-        Repositories/
-        PaymentContext.cs
-        UnitOfWork.cs
+        Handlers/
+          PaymentProcessedEventHandler.cs
+          PaymentRefundedEventHandler.cs      # Novo
+        Mediator/
+          IMediatorHandler.cs
+          MediatorHandler.cs
+        Services/
+          PaymentService.cs
+      Consumers/
+        OrderPlacedEventConsumer.cs
       Domain/
-        Contracts/
-        Models/
+        Entities/
+          Payment.cs                          # Modificado: dispara 4 domain events
+          Transaction.cs
+          CreditCard.cs
+          Enums/
+            PaymentStatus.cs                  # Pending/Approved/Denied/Refunded
+            TransactionStatus.cs
+            PaymentMethod.cs
+        Events/
+          PaymentCreatedDomainEvent.cs        # Novo
+          PaymentAttemptFailedDomainEvent.cs  # Novo
+          PaymentProcessedDomainEvent.cs
+          PaymentRefundedDomainEvent.cs       # Novo
+        EventSourcing/
+          StoredEvent.cs                      # Novo
+          IEventStoreRepository.cs            # Novo
       Facade/
-      Services/
-      Settings/
+        IPaymentFacade.cs
+        CreditCardPaymentFacade.cs
+      Infrastructure/
+        EventSourcing/
+          EventStoreRepository.cs             # Novo
+        Persistence/
+          Mappings/
+            PaymentMapping.cs
+            TransactionMapping.cs
+            StoredEventMapping.cs             # Novo
+          Repositories/
+            PaymentRepository.cs
+          PaymentContext.cs                   # Modificado: persistencia atomica
+          UnitOfWork.cs
+        Settings/
+          DependencyInjectionConfig.cs        # Modificado
+          MassTransitConfig.cs
+      Migrations/
+        ..._AddEventSourcing.cs               # Nova migration
       Program.cs
-      appsettings.json
-      Dockerfile
-    FCG.Core/                        # Biblioteca compartilhada
-    FCG.FakePaymentProvider/         # Simulador de gateway
+
+    FCG.Core/
+      Integration/
+        OrderPlacedEvent.cs
+        PaymentProcessedEvent.cs
+        PaymentRefundedEvent.cs               # Novo
+
+    FCG.FakePaymentProvider/
+
   tests/
     FCG.Payments.Tests/
+      Domain/
+        Extensions/
+          OrderEventExtensionsTests.cs
+        Models/
+          PaymentTests.cs                     # Atualizado: testa novos domain events
       README_TESTES_FCG_Payments.md
+
   README.md
 ```
 
 ## Fluxo de Processamento
 
-1. Orders Service publica `OrderPlacedEvent`.
-2. Mensagem chega na fila do RabbitMQ (`order-placed-event-queue`).
-3. `OrderPlacedEventConsumer` consome a mensagem e chama `PaymentService`.
-4. `PaymentService` processa o pagamento, realiza tentativas, persiste transações e publica `PaymentProcessedEvent`.
+```
+[Orders API]  --publica OrderPlacedEvent-->  [RabbitMQ]
+                                                  |
+                                                  v
+                                   [OrderPlacedEventConsumer]
+                                                  |
+                                                  v
+                                   [PaymentService.ProcessPayment()]
+                                      |
+                                      |-- Idempotencia: ja aprovado? Re-publica e retorna.
+                                      |-- Cria Payment -> PaymentCreatedDomainEvent (memoria)
+                                      |-- Gateway (ate 3x)
+                                      |       |-- Falha -> PaymentAttemptFailedDomainEvent (memoria)
+                                      |-- payment.Process() -> PaymentProcessedDomainEvent (memoria)
+                                      |
+                                      v
+                              [UnitOfWork.CommitAsync()]
+                                      |
+                                      v
+                       [PaymentContext.SaveChangesAsync()]
+                              |-- Serializa eventos -> StoredEvent (JSON)
+                              |-- base.SaveChangesAsync()
+                              |       |-- tabela Payments
+                              |       |-- tabela Transactions
+                              |       |-- tabela StoredEvents  <- atomico
+                              |-- PublishEvent() -> MediatR
+                                      |
+                                      v
+                       [PaymentProcessedEventHandler]
+                                      |  MassTransit
+                                      v
+                                 [RabbitMQ]  ->  [Orders API]
+```
 
 ## Eventos e Mensageria
 
-### OrderPlacedEvent (exemplo)
+### Visao geral
 
-```json
-{
-  "orderId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "customerId": "3fa85f64-5717-4562-b3fc-2c963f66afa7",
-  "amount": 150.00,
-  "paymentMethod": 1,
-  "creditCard": {
-    "cardName": "JOHN DOE",
-    "cardNumber": "4111111111111111",
-    "cardExpirationDate": "12/25",
-    "cvv": "123"
-  }
-}
-```
+| Evento | Tipo | Destino | Descricao |
+|--------|------|---------|-----------|
+| `OrderPlacedEvent` | Integration (entrada) | RabbitMQ | Pedido realizado pelo cliente |
+| `PaymentCreatedDomainEvent` | Domain | StoredEvents | Pagamento criado com status Pending |
+| `PaymentAttemptFailedDomainEvent` | Domain | StoredEvents | Tentativa negada pelo gateway |
+| `PaymentProcessedDomainEvent` | Domain | StoredEvents + MediatR | Resultado final (aprovado ou negado) |
+| `PaymentProcessedEvent` | Integration (saida) | RabbitMQ | Notifica Orders API do resultado |
+| `PaymentRefundedDomainEvent` | Domain | StoredEvents + MediatR | Pagamento estornado |
+| `PaymentRefundedEvent` | Integration (saida) | RabbitMQ | Notifica Orders API do estorno |
 
-**Fila RabbitMQ**: `order-placed-event-queue`
-
-### PaymentProcessedEvent (exemplo)
+### PaymentProcessedEvent (saida)
 
 ```json
 {
@@ -327,118 +398,97 @@ FCG.Payments/
 }
 ```
 
-**Status**
-- `1` = Approved
-- `2` = Denied
+**Status**: `1` = Approved / `2` = Denied
 
-**Fila RabbitMQ**: `payment-processed-event-queue`
+### PaymentRefundedEvent (saida)
 
-## Política de Retry
+```json
+{
+  "orderId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "paymentId": "3fa85f64-5717-4562-b3fc-2c963f66afa8",
+  "amount": 150.00,
+  "reason": "Solicitado pelo cliente"
+}
+```
 
-- Tentativas: configurável via `RetrySettings:MaxRetryAttempts` (padrão: 5).
-- Delay: configurável via `RetrySettings:DelayBetweenRetriesInSeconds` (padrão: 10s).
-- Estratégia: Interval retry (delay fixo entre tentativas).
+## Modelo de Dados
+
+### Payments
+
+| Coluna | Tipo | Descricao |
+|--------|------|-----------|
+| `Id` | UNIQUEIDENTIFIER | Chave primaria |
+| `OrderId` | UNIQUEIDENTIFIER | Referencia ao pedido |
+| `PaymentMethod` | INT | 1=CreditCard / 2=Invoice |
+| `Amount` | DECIMAL | Valor total |
+| `Status` | INT | 0=Pending / 1=Approved / 2=Denied / 3=Refunded |
+
+### Transactions
+
+| Coluna | Tipo | Descricao |
+|--------|------|-----------|
+| `Id` | UNIQUEIDENTIFIER | Chave primaria |
+| `PaymentId` | UNIQUEIDENTIFIER | FK para Payments |
+| `Status` | INT | 1=Authorized / 3=Declined / 4=Refunded / 5=Cancelled |
+| `TotalAmount` | DECIMAL | Valor da transacao |
+| `TransactionCost` | DECIMAL | Custo da transacao |
+| `AuthorizationCode` | VARCHAR(100) | Codigo de autorizacao do gateway |
+| `Nsu` | VARCHAR(100) | Numero Sequencial Unico |
+| `Tid` | VARCHAR(100) | Transaction Identifier |
+| `TransactionDate` | DATETIME2 | Data da transacao |
+
+### StoredEvents
+
+| Coluna | Tipo | Descricao |
+|--------|------|-----------|
+| `Id` | UNIQUEIDENTIFIER | Chave primaria |
+| `AggregateId` | UNIQUEIDENTIFIER | Referencia ao Payment.Id |
+| `AggregateType` | VARCHAR(100) | Tipo do agregado (ex: Payment) |
+| `EventType` | VARCHAR(100) | Tipo do evento (ex: PaymentProcessedDomainEvent) |
+| `Payload` | NVARCHAR(MAX) | JSON completo do evento |
+| `OccurredOn` | DATETIME2 | Timestamp UTC do evento |
+
+## Politica de Retry
+
+- Tentativas no gateway: ate **3x** por pagamento (PaymentService).
+- Retry de mensagens RabbitMQ: configuravel via `RetrySettings:MaxRetryAttempts` (padrao: 5).
+- Delay: configuravel via `RetrySettings:DelayBetweenRetriesInSeconds` (padrao: 10s).
 
 ## Testes
 
-### Executar testes
-
 ```bash
 dotnet test
-dotnet test /p:CollectCoverage=true /p:CoverageReportFormat=opencover
-dotnet test --filter "FullyQualifiedName~PaymentServiceTests"
+dotnet test --collect:"XPlat Code Coverage"
+dotnet test --filter "FullyQualifiedName~PaymentTests"
 ```
 
-## Modelo de Dados (resumo)
+Consulte o [README de testes](tests/FCG.Payments.Tests/README_TESTES_FCG_Payments.md) para mais detalhes.
 
-### Payments
-- Id (UNIQUEIDENTIFIER)
-- OrderId (UNIQUEIDENTIFIER)
-- PaymentMethod (INT)
-- Amount (DECIMAL(18,2))
-- Status (INT)
-- CardName (VARCHAR(200))
-- CardNumber (VARCHAR(16))
-- CardExpirationDate (VARCHAR(7))
-- CVV (VARCHAR(4))
+## Seguranca
 
-### Transactions
-- Id (UNIQUEIDENTIFIER)
-- PaymentId (UNIQUEIDENTIFIER)
-- Status (INT)
-- TotalAmount (DECIMAL(18,2))
-- TransactionCost (DECIMAL(18,2))
-- CardBrand (VARCHAR(50))
-- AuthorizationCode (VARCHAR(100))
-- Nsu (VARCHAR(100))
-- Tid (VARCHAR(100))
-- TransactionDate (DATETIME2)
-
-## Segurança
-
-- Cartões de crédito: armazenados apenas para testes (não recomendado em produção).
-- Produção: implementar tokenização/PCI-DSS.
-- API Keys: gerenciadas via variáveis de ambiente.
-- Conexões: TLS/SSL para RabbitMQ e SQL Server.
-
-Boas práticas:
-1. Nunca commitar `appsettings.json` com segredos.
-2. Usar User Secrets em desenvolvimento.
-3. Usar Key Vault / Secrets Manager em produção.
-4. Implementar rate limiting no gateway.
-5. Validar todos os inputs no Consumer.
+- Cartoes de credito: armazenados apenas para testes (nao recomendado em producao).
+- Producao: implementar tokenizacao/PCI-DSS.
+- API Keys: gerenciadas via variaveis de ambiente.
+- Nunca commitar `appsettings.json` com segredos.
 
 ## Troubleshooting
 
-- Migrations não aplicadas:
-  - `dotnet ef database update --project src/FCG.Payments`
-  - Verificar connection string e disponibilidade do SQL Server.
-
-- RabbitMQ não conecta:
-  - `docker ps | grep rabbitmq`
-  - `docker logs <container-id>`
-  - Testar conexão com `telnet localhost 5672`
-
-- Pagamentos duplicados:
-  - Verificar idempotência pela validação de `OrderId`.
-
-## Monitoramento
-
-- Logs: Information, Warning, Error.
-- Métricas recomendadas:
-  1. Taxa de sucesso de pagamentos
-  2. Tempo médio de processamento
-  3. Número de retries por pagamento
-  4. Mensagens em Dead Letter Queue
-  5. Tempo de aplicação de migrations
-
-Healthcheck (exemplo):
-
-```csharp
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<PaymentContext>()
-    .AddRabbitMQ(rabbitConnectionString);
-```
+| Problema | Solucao |
+|----------|---------|
+| Migrations nao aplicadas | `dotnet ef database update --project src/FCG.Payments` |
+| RabbitMQ nao conecta | `docker logs <container-id>` |
+| Pagamentos duplicados | Verificar idempotencia pela validacao de OrderId |
+| StoredEvents nao gravados | Confirmar que SaveChangesAsync e chamado via UnitOfWork |
 
 ## Contribuindo
 
 1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
+2. Crie uma branch (`git checkout -b feature/MinhaFeature`)
+3. Commit suas mudancas (`git commit -m 'Add MinhaFeature'`)
+4. Push para a branch (`git push origin feature/MinhaFeature`)
 5. Abra um Pull Request
 
-## Licença
-
-Projeto acadêmico — Tech Challenge FIAP.
-
-## Autores
-
-Desenvolvido pela equipe Tech Challenge FIAP.
-
-## Suporte
-
-- GitHub Issues: https://github.com/Tech-Challenge-FIAP-58/PaymentsAPI/issues
-
 ---
-Nota: Este é um projeto acadêmico. Para uso em produção, implemente medidas adicionais de segurança, compliance PCI-DSS e auditoria.
+
+Projeto academico - Tech Challenge FIAP
+GitHub: https://github.com/Tech-Challenge-FIAP-58/PaymentsAPI

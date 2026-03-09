@@ -4,6 +4,8 @@ using FCG.Payments.Infrastructure.Persistence;
 using FCG.Payments.Application.Interfaces;
 using FCG.Payments.Application.Mediator;
 using FCG.Payments.Application.Services;
+using FCG.Payments.Domain.EventSourcing;
+using FCG.Payments.Infrastructure.EventSourcing;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using FCG.Payments.Facade;
@@ -25,6 +27,7 @@ namespace FCG.Payments.Infrastructure.Settings
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+            builder.Services.AddScoped<IEventStoreRepository, EventStoreRepository>();
         }
     }
 }

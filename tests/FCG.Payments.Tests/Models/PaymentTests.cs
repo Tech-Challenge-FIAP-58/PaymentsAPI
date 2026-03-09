@@ -88,8 +88,8 @@ public class PaymentTests
         payment.Process(transaction);
 
         // Assert
-        payment.Notificacoes.Should().HaveCount(1);
-        var domainEvent = payment.Notificacoes.First() as PaymentProcessedDomainEvent;
+        payment.Notificacoes.Should().HaveCount(2);
+        var domainEvent = payment.Notificacoes.OfType<PaymentProcessedDomainEvent>().Single();
         domainEvent.Should().NotBeNull();
         domainEvent!.OrderId.Should().Be(payment.OrderId);
         domainEvent.PaymentId.Should().Be(payment.Id);
@@ -109,8 +109,8 @@ public class PaymentTests
         payment.Process(transaction);
 
         // Assert
-        payment.Notificacoes.Should().HaveCount(1);
-        var domainEvent = payment.Notificacoes.First() as PaymentProcessedDomainEvent;
+        payment.Notificacoes.Should().HaveCount(2);
+        var domainEvent = payment.Notificacoes.OfType<PaymentProcessedDomainEvent>().Single();
         domainEvent.Should().NotBeNull();
         domainEvent!.Status.Should().Be(PaymentResultStatus.Denied);
         domainEvent.Reason.Should().Be("Payment denied by gateway");

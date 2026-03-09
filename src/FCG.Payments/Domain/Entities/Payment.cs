@@ -1,6 +1,7 @@
 ﻿using FCG.Core.Integration;
 using FCG.Payments.Domain.Entities.Enums;
 using FCG.Payments.Domain.Events;
+using FCG.Payments.Domain;
 
 namespace FCG.Payments.Domain.Entities;
 
@@ -32,11 +33,17 @@ public class Payment : Entity
         CreditCard = creditCard;
         Transactions = new List<Transaction>();
         Status = PaymentStatus.Pending;
+
+        AddEvent(new PaymentCreatedDomainEvent(orderId, Id, amount, paymentMethod));
     }
 
     public void AddTransaction(Transaction transaction)
     {
         Transactions.Add(transaction);
+
+        if (transaction.Status != TransactionStatus.Authorized)
+            AddEvent(new PaymentAttemptFailedDomainEvent(
+                OrderId, Id, transaction.Id, transaction.Status));
     }
 
     public void Process(Transaction transaction)
@@ -60,5 +67,15 @@ public class Payment : Entity
                 ? "Payment denied by gateway"
                 : null
         ));
+    }
+
+    public void Refund(string? reason = null)
+    {
+        if (Status != PaymentStatus.Approved)
+            throw new DomainException("Only approved payments can be refunded.");
+
+        Status = PaymentStatus.Refunded;
+
+        AddEvent(new PaymentRefundedDomainEvent(OrderId, Id, Amount, reason));
     }
 }
