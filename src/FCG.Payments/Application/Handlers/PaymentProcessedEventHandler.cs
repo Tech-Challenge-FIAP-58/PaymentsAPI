@@ -22,7 +22,7 @@ public class PaymentProcessedEventHandler
         await _publishEndpoint.Publish(
             new PaymentProcessedEvent(
                 notification.OrderId,
-                notification.PaymentId,
+                notification.AggregateId,
                 notification.Amount,
                 notification.Status,
                 notification.Reason

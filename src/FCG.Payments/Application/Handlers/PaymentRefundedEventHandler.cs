@@ -22,7 +22,7 @@ public class PaymentRefundedEventHandler
         await _publishEndpoint.Publish(
             new PaymentRefundedEvent(
                 notification.OrderId,
-                notification.PaymentId,
+                notification.AggregateId,
                 notification.Amount,
                 notification.Reason
             ),

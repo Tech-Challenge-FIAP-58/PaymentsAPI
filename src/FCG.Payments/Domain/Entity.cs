@@ -23,6 +23,7 @@ namespace FCG.Payments.Domain
         public void AddEvent(Event evento)
         {
             _notificacoes = _notificacoes ?? new List<Event>();
+            evento.AggregateId = this.Id;
             _notificacoes.Add(evento);
         }
 

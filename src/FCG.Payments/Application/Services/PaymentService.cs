@@ -48,7 +48,6 @@ public class PaymentService : IPaymentService
         {
             await _mediatorHandler.PublishEvent(new PaymentProcessedDomainEvent(
                 successfulPayment.OrderId,
-                successfulPayment.Id,
                 successfulPayment.Amount,
                 PaymentResultStatus.Approved,
                 null

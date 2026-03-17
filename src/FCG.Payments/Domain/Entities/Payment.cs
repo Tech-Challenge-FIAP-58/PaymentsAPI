@@ -1,16 +1,15 @@
 ﻿using FCG.Core.Integration;
 using FCG.Payments.Domain.Entities.Enums;
 using FCG.Payments.Domain.Events;
-using FCG.Payments.Domain;
 
 namespace FCG.Payments.Domain.Entities;
 
 public class Payment : Entity
 {
-    public Guid OrderId { get; set; }
-    public PaymentMethod PaymentMethod { get; set; }
-    public decimal Amount { get; set; }
-    public CreditCard CreditCard { get; set; }
+    public Guid OrderId { get; private set; }
+    public PaymentMethod PaymentMethod { get; private set; }
+    public decimal Amount { get; private set; }
+    public CreditCard CreditCard { get; private set; }
     public PaymentStatus Status { get; private set; }
 
     // EF Relation
@@ -21,20 +20,24 @@ public class Payment : Entity
         Transactions = new List<Transaction>();
     }
 
-    public Payment(
+    public static Payment Create(
         Guid orderId,
         PaymentMethod paymentMethod,
         decimal amount,
         CreditCard creditCard)
     {
-        OrderId = orderId;
-        PaymentMethod = paymentMethod;
-        Amount = amount;
-        CreditCard = creditCard;
-        Transactions = new List<Transaction>();
-        Status = PaymentStatus.Pending;
+        var payment = new Payment
+        {
+            Id = Guid.NewGuid(),
+            OrderId = orderId,
+            PaymentMethod = paymentMethod,
+            Amount = amount,
+            CreditCard = creditCard,
+            Status = PaymentStatus.Pending
+        };
 
-        AddEvent(new PaymentCreatedDomainEvent(orderId, Id, amount, paymentMethod));
+        payment.AddEvent(new PaymentCreatedDomainEvent(orderId, amount, paymentMethod));
+        return payment;
     }
 
     public void AddTransaction(Transaction transaction)
@@ -43,7 +46,7 @@ public class Payment : Entity
 
         if (transaction.Status != TransactionStatus.Authorized)
             AddEvent(new PaymentAttemptFailedDomainEvent(
-                OrderId, Id, transaction.Id, transaction.Status));
+                transaction.Id, transaction.Status));
     }
 
     public void Process(Transaction transaction)
@@ -60,7 +63,6 @@ public class Payment : Entity
 
         AddEvent(new PaymentProcessedDomainEvent(
             OrderId,
-            Id,
             Amount,
             status,
             status == PaymentResultStatus.Denied
@@ -76,6 +78,6 @@ public class Payment : Entity
 
         Status = PaymentStatus.Refunded;
 
-        AddEvent(new PaymentRefundedDomainEvent(OrderId, Id, Amount, reason));
+        AddEvent(new PaymentRefundedDomainEvent(OrderId, Amount, reason));
     }
 }
