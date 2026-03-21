@@ -7,8 +7,14 @@ using FCG.Payments.Domain.Entities.Enums;
 using FCG.Payments.Domain.Entities;
 using FCG.Payments.Application.Interfaces;
 using FCG.Core.Integration;
+using System.Net.Http;
+using System.Text;
+using Newtonsoft.Json;
+
 
 namespace FCG.Payments.Application.Services;
+
+
 
 public interface IPaymentService
 {
@@ -17,6 +23,14 @@ public interface IPaymentService
 
 public class PaymentService : IPaymentService
 {
+    // pedretti
+    private static readonly HttpClient _httpClient = new HttpClient
+    {
+        BaseAddress = new Uri("http://localhost:8000")
+    };
+    // fim pedretti
+
+
     private const int MAXATTEMPTS = 3;
 
     private readonly IPaymentFacade _paymentFacade;
@@ -63,7 +77,21 @@ public class PaymentService : IPaymentService
 
         for (var attempt = 1; attempt <= MAXATTEMPTS; attempt++)
         {
-            transaction = await _paymentFacade.ProcessPayment(payment);
+            //transaction = await _paymentFacade.ProcessPayment(payment);
+
+            // pedretti
+            var json = JsonConvert.SerializeObject(eventData);
+
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("/payments", content);
+
+            response.EnsureSuccessStatusCode();
+
+            var body = await response.Content.ReadAsStringAsync();
+
+            transaction = JsonConvert.DeserializeObject<Transaction>(body);
+            // fim pedretti
 
             if (transaction.Status == TransactionStatus.Authorized)
                 break;
