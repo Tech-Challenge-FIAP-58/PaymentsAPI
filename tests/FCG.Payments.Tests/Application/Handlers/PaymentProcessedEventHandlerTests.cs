@@ -22,13 +22,14 @@ public class PaymentProcessedEventHandlerTests
     public async Task Handle_ShouldPublishPaymentProcessedEvent()
     {
         // Arrange
+        var paymentId = Guid.NewGuid();
         var domainEvent = new PaymentProcessedDomainEvent(
-            Guid.NewGuid(),
             Guid.NewGuid(),
             100m,
             PaymentResultStatus.Approved,
             null
         );
+        domainEvent.AggregateId = paymentId;
 
         // Act
         await _handler.Handle(domainEvent, CancellationToken.None);
@@ -38,7 +39,7 @@ public class PaymentProcessedEventHandlerTests
             x => x.Publish(
                 It.Is<PaymentProcessedEvent>(
                     e => e.OrderId == domainEvent.OrderId &&
-                         e.PaymentId == domainEvent.PaymentId &&
+                         e.PaymentId == domainEvent.AggregateId &&
                          e.Amount == domainEvent.Amount &&
                          e.Status == domainEvent.Status
                 ),
@@ -59,11 +60,11 @@ public class PaymentProcessedEventHandlerTests
 
         var domainEvent = new PaymentProcessedDomainEvent(
             orderId,
-            paymentId,
             amount,
             status,
             null
         );
+        domainEvent.AggregateId = paymentId;
 
         // Act
         await _handler.Handle(domainEvent, CancellationToken.None);
@@ -89,11 +90,11 @@ public class PaymentProcessedEventHandlerTests
         // Arrange
         var domainEvent = new PaymentProcessedDomainEvent(
             Guid.NewGuid(),
-            Guid.NewGuid(),
             100m,
             PaymentResultStatus.Denied,
             "Payment denied by gateway"
         );
+        domainEvent.AggregateId = Guid.NewGuid();
 
         // Act
         await _handler.Handle(domainEvent, CancellationToken.None);
@@ -117,11 +118,11 @@ public class PaymentProcessedEventHandlerTests
         // Arrange
         var domainEvent = new PaymentProcessedDomainEvent(
             Guid.NewGuid(),
-            Guid.NewGuid(),
             100m,
             PaymentResultStatus.Approved,
             null
         );
+        domainEvent.AggregateId = Guid.NewGuid();
 
         var cancellationToken = new CancellationToken();
 
@@ -144,11 +145,11 @@ public class PaymentProcessedEventHandlerTests
         // Arrange
         var domainEvent = new PaymentProcessedDomainEvent(
             Guid.NewGuid(),
-            Guid.NewGuid(),
             100m,
             PaymentResultStatus.Approved,
             null
         );
+        domainEvent.AggregateId = Guid.NewGuid();
 
         _publishEndpointMock
             .Setup(x => x.Publish(
@@ -173,13 +174,14 @@ public class PaymentProcessedEventHandlerTests
 
         var handler = new PaymentProcessedEventHandler(publishMock.Object);
 
+        var paymentId = Guid.NewGuid();
         var domainEvent = new PaymentProcessedDomainEvent(
             orderId: Guid.NewGuid(),
-            paymentId: Guid.NewGuid(),
             amount: 100,
             status: PaymentResultStatus.Approved,
             reason: "OK"
         );
+        domainEvent.AggregateId = paymentId;
 
         // Act
         await handler.Handle(domainEvent, CancellationToken.None);
@@ -189,7 +191,7 @@ public class PaymentProcessedEventHandlerTests
             x.Publish(
                 It.Is<PaymentProcessedEvent>(e =>
                     e.OrderId == domainEvent.OrderId &&
-                    e.PaymentId == domainEvent.PaymentId &&
+                    e.PaymentId == domainEvent.AggregateId &&
                     e.Amount == domainEvent.Amount &&
                     e.Status == domainEvent.Status &&
                     e.Reason == domainEvent.Reason

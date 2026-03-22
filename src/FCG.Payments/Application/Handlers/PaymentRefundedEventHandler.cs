@@ -1,30 +1,29 @@
-﻿using FCG.Core.Integration;
+using FCG.Core.Integration;
 using FCG.Payments.Domain.Events;
 using MassTransit;
 using MediatR;
 
 namespace FCG.Payments.Application.Handlers;
 
-public class PaymentProcessedEventHandler
-    : INotificationHandler<PaymentProcessedDomainEvent>
+public class PaymentRefundedEventHandler
+    : INotificationHandler<PaymentRefundedDomainEvent>
 {
     private readonly IPublishEndpoint _publishEndpoint;
 
-    public PaymentProcessedEventHandler(IPublishEndpoint publishEndpoint)
+    public PaymentRefundedEventHandler(IPublishEndpoint publishEndpoint)
     {
         _publishEndpoint = publishEndpoint;
     }
 
     public async Task Handle(
-        PaymentProcessedDomainEvent notification,
+        PaymentRefundedDomainEvent notification,
         CancellationToken cancellationToken)
     {
         await _publishEndpoint.Publish(
-            new PaymentProcessedEvent(
+            new PaymentRefundedEvent(
                 notification.OrderId,
                 notification.AggregateId,
                 notification.Amount,
-                notification.Status,
                 notification.Reason
             ),
             cancellationToken

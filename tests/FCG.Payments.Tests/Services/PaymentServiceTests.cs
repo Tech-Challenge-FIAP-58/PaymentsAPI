@@ -122,7 +122,7 @@ public class PaymentServiceTests
         var orderId = Guid.NewGuid();
         var orderPlacedEvent = CreateOrderPlacedEvent(orderId);
 
-        var existingPayment = new Payment(
+        var existingPayment = Payment.Create(
             orderId,
             PaymentMethod.CreditCard,
             100m,

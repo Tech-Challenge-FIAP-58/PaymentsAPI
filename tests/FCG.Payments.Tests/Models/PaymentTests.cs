@@ -16,7 +16,7 @@ public class PaymentTests
         var creditCard = CreateCreditCard();
 
         // Act
-        var payment = new Payment(
+        var payment = Payment.Create(
             orderId,
             PaymentMethod.CreditCard,
             100m,
@@ -88,11 +88,11 @@ public class PaymentTests
         payment.Process(transaction);
 
         // Assert
-        payment.Notificacoes.Should().HaveCount(1);
-        var domainEvent = payment.Notificacoes.First() as PaymentProcessedDomainEvent;
+        payment.Notificacoes.Should().HaveCount(2);
+        var domainEvent = payment.Notificacoes.OfType<PaymentProcessedDomainEvent>().Single();
         domainEvent.Should().NotBeNull();
         domainEvent!.OrderId.Should().Be(payment.OrderId);
-        domainEvent.PaymentId.Should().Be(payment.Id);
+        domainEvent.AggregateId.Should().Be(payment.Id);
         domainEvent.Amount.Should().Be(payment.Amount);
         domainEvent.Status.Should().Be(PaymentResultStatus.Approved);
         domainEvent.Reason.Should().BeNull();
@@ -109,8 +109,8 @@ public class PaymentTests
         payment.Process(transaction);
 
         // Assert
-        payment.Notificacoes.Should().HaveCount(1);
-        var domainEvent = payment.Notificacoes.First() as PaymentProcessedDomainEvent;
+        payment.Notificacoes.Should().HaveCount(2);
+        var domainEvent = payment.Notificacoes.OfType<PaymentProcessedDomainEvent>().Single();
         domainEvent.Should().NotBeNull();
         domainEvent!.Status.Should().Be(PaymentResultStatus.Denied);
         domainEvent.Reason.Should().Be("Payment denied by gateway");
@@ -152,7 +152,7 @@ public class PaymentTests
 
     private static Payment CreatePayment()
     {
-        return new Payment(
+        return Payment.Create(
             Guid.NewGuid(),
             PaymentMethod.CreditCard,
             100m,

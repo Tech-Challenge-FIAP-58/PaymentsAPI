@@ -2,10 +2,12 @@
 using FCG.Payments.Domain;
 using FCG.Payments.Domain.Entities;
 using FCG.Payments.Domain.Entities.Mediatr;
+using FCG.Payments.Domain.EventSourcing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
+using System.Text.Json;
 
 namespace FCG.Payments.Infrastructure.Persistence
 {
@@ -24,6 +26,7 @@ namespace FCG.Payments.Infrastructure.Persistence
 
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<StoredEvent> StoredEvents { get; set; }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
@@ -72,38 +75,34 @@ namespace FCG.Payments.Infrastructure.Persistence
                 }
             }
 
-            var affectedRows = await base.SaveChangesAsync();
-
-            if (!(affectedRows > 0)) return affectedRows;
-
-            await _mediatorHandler.PublishEvents(this);
-
-            return affectedRows;
-        }
-    }
-
-    public static class MediatorExtension
-    {
-        public static async Task PublishEvents<T>(this IMediatorHandler mediator, T ctx) where T : DbContext
-        {
-            var domainEntities = ctx.ChangeTracker
-                .Entries<Entity>()
-                .Where(x => x.Entity.Notificacoes != null && x.Entity.Notificacoes.Any());
+            var domainEntities = ChangeTracker.Entries<Entity>()
+                .Where(x => x.Entity.Notificacoes != null && x.Entity.Notificacoes.Any())
+                .ToList();
 
             var domainEvents = domainEntities
                 .SelectMany(x => x.Entity.Notificacoes)
                 .ToList();
 
-            domainEntities.ToList()
-                .ForEach(entity => entity.Entity.ClearEvents());
+            foreach (var entry in domainEntities)
+                foreach (var domainEvent in entry.Entity.Notificacoes)
+                    StoredEvents.Add(new StoredEvent(
+                        entry.Entity.Id,
+                        entry.Entity.GetType().Name,
+                        domainEvent.GetType().Name,
+                        JsonSerializer.Serialize((object)domainEvent)
+                    ));
 
-            var tasks = domainEvents
-                .Select(async (domainEvent) =>
-                {
-                    await mediator.PublishEvent(domainEvent);
-                });
+            domainEntities.ForEach(e => e.Entity.ClearEvents());
 
-            await Task.WhenAll(tasks);
+            var affectedRows = await base.SaveChangesAsync(cancellationToken);
+
+            if (domainEvents.Count > 0)
+            {
+                var tasks = domainEvents.Select(e => _mediatorHandler.PublishEvent(e));
+                await Task.WhenAll(tasks);
+            }
+
+            return affectedRows;
         }
     }
 }

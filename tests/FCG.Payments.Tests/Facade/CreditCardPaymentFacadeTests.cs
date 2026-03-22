@@ -133,7 +133,7 @@ public class CreditCardPaymentFacadeTests
             "123"
         );
 
-        return new Payment(
+        return Payment.Create(
             Guid.NewGuid(),
             PaymentMethod.CreditCard,
             100m,
