@@ -83,7 +83,14 @@ public class PaymentService : IPaymentService
 
             var response = await _httpClient.PostAsync("/", content);
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+            
+                _logger.LogError("Erro na Lambda: {Status} - {Body}", response.StatusCode, error);
+            
+                return; // evita retry infinito
+            }
 
             var body = await response.Content.ReadAsStringAsync();
 
