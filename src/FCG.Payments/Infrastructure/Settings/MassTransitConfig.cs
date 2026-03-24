@@ -2,6 +2,7 @@
 using MassTransit;
 using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Authentication;
 
 namespace FCG.Payments.Infrastructure.Settings
 {
@@ -20,10 +21,15 @@ namespace FCG.Payments.Infrastructure.Settings
                         .GetRequiredService<IOptions<RabbitMqSettings>>()
                         .Value;
 
-                    cfg.Host(rabbitSettings.Host, rabbitSettings.VirtualHost, h =>
+                    cfg.Host(rabbitSettings.Host, 5671, "/", h =>
                     {
                         h.Username(rabbitSettings.Username);
                         h.Password(rabbitSettings.Password);
+                        h.UseSsl(s =>
+                        {
+                            s.Protocol = SslProtocols.Tls12;
+                            s.ServerName = rabbitSettings.Host; // O ServerName deve ser igual ao Host para validação do certificado SSL
+                        });
                     });
 
                     cfg.UseMessageRetry(r =>

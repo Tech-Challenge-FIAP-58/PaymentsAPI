@@ -9,6 +9,9 @@ using FCG.Payments.Domain.Events;
 using FCG.Payments.Facade;
 using FluentAssertions;
 using Moq;
+using System.Net;
+using System.Text;
+using System.Text.Json;
 
 namespace FCG.Payments.Test.Services;
 
@@ -18,7 +21,6 @@ public class PaymentServiceTests
     private readonly Mock<IPaymentRepository> _paymentRepositoryMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IMediatorHandler> _mediatorHandlerMock;
-    private readonly PaymentService _paymentService;
 
     public PaymentServiceTests()
     {
@@ -26,19 +28,14 @@ public class PaymentServiceTests
         _paymentRepositoryMock = new Mock<IPaymentRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _mediatorHandlerMock = new Mock<IMediatorHandler>();
-
-        _paymentService = new PaymentService(
-            _paymentFacadeMock.Object,
-            _paymentRepositoryMock.Object,
-            _unitOfWorkMock.Object,
-            _mediatorHandlerMock.Object
-        );
     }
 
     [Fact]
     public async Task ProcessPayment_ShouldAuthorizeOnFirstAttempt_WhenPaymentIsSuccessful()
     {
         // Arrange
+        var paymentProviderHandler = new PaymentProviderHandler(TransactionStatus.Authorized);
+        var paymentService = CreatePaymentService(paymentProviderHandler);
         var orderId = Guid.NewGuid();
         var orderPlacedEvent = CreateOrderPlacedEvent(orderId);
 
@@ -46,17 +43,11 @@ public class PaymentServiceTests
             .Setup(x => x.GetPaymentByOrderId(orderId))
             .ReturnsAsync(new List<Payment>());
 
-        var authorizedTransaction = CreateTransaction(TransactionStatus.Authorized);
-
-        _paymentFacadeMock
-            .Setup(x => x.ProcessPayment(It.IsAny<Payment>()))
-            .ReturnsAsync(authorizedTransaction);
-
         // Act
-        await _paymentService.ProcessPayment(orderPlacedEvent);
+        await paymentService.ProcessPayment(orderPlacedEvent);
 
         // Assert
-        _paymentFacadeMock.Verify(x => x.ProcessPayment(It.IsAny<Payment>()), Times.Once);
+        paymentProviderHandler.CallCount.Should().Be(1);
         _paymentRepositoryMock.Verify(x => x.AddPayment(It.IsAny<Payment>()), Times.Once);
         _unitOfWorkMock.Verify(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWorkMock.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -66,6 +57,11 @@ public class PaymentServiceTests
     public async Task ProcessPayment_ShouldRetryThreeTimes_WhenPaymentFails()
     {
         // Arrange
+        var paymentProviderHandler = new PaymentProviderHandler(
+            TransactionStatus.Declined,
+            TransactionStatus.Declined,
+            TransactionStatus.Declined);
+        var paymentService = CreatePaymentService(paymentProviderHandler);
         var orderId = Guid.NewGuid();
         var orderPlacedEvent = CreateOrderPlacedEvent(orderId);
 
@@ -73,17 +69,11 @@ public class PaymentServiceTests
             .Setup(x => x.GetPaymentByOrderId(orderId))
             .ReturnsAsync(new List<Payment>());
 
-        var deniedTransaction = CreateTransaction(TransactionStatus.Declined);
-
-        _paymentFacadeMock
-            .Setup(x => x.ProcessPayment(It.IsAny<Payment>()))
-            .ReturnsAsync(deniedTransaction);
-
         // Act
-        await _paymentService.ProcessPayment(orderPlacedEvent);
+        await paymentService.ProcessPayment(orderPlacedEvent);
 
         // Assert
-        _paymentFacadeMock.Verify(x => x.ProcessPayment(It.IsAny<Payment>()), Times.Exactly(3));
+        paymentProviderHandler.CallCount.Should().Be(3);
         _paymentRepositoryMock.Verify(x => x.AddPayment(It.IsAny<Payment>()), Times.Once);
     }
 
@@ -91,6 +81,11 @@ public class PaymentServiceTests
     public async Task ProcessPayment_ShouldAuthorizeOnThirdAttempt_WhenPreviousAttemptsFailed()
     {
         // Arrange
+        var paymentProviderHandler = new PaymentProviderHandler(
+            TransactionStatus.Declined,
+            TransactionStatus.Declined,
+            TransactionStatus.Authorized);
+        var paymentService = CreatePaymentService(paymentProviderHandler);
         var orderId = Guid.NewGuid();
         var orderPlacedEvent = CreateOrderPlacedEvent(orderId);
 
@@ -98,20 +93,11 @@ public class PaymentServiceTests
             .Setup(x => x.GetPaymentByOrderId(orderId))
             .ReturnsAsync(new List<Payment>());
 
-        var deniedTransaction = CreateTransaction(TransactionStatus.Declined);
-        var authorizedTransaction = CreateTransaction(TransactionStatus.Authorized);
-
-        _paymentFacadeMock
-            .SetupSequence(x => x.ProcessPayment(It.IsAny<Payment>()))
-            .ReturnsAsync(deniedTransaction)
-            .ReturnsAsync(deniedTransaction)
-            .ReturnsAsync(authorizedTransaction);
-
         // Act
-        await _paymentService.ProcessPayment(orderPlacedEvent);
+        await paymentService.ProcessPayment(orderPlacedEvent);
 
         // Assert
-        _paymentFacadeMock.Verify(x => x.ProcessPayment(It.IsAny<Payment>()), Times.Exactly(3));
+        paymentProviderHandler.CallCount.Should().Be(3);
         _paymentRepositoryMock.Verify(x => x.AddPayment(It.IsAny<Payment>()), Times.Once);
     }
 
@@ -119,6 +105,8 @@ public class PaymentServiceTests
     public async Task ProcessPayment_ShouldNotProcessAgain_WhenOrderAlreadyHasSuccessfulPayment()
     {
         // Arrange
+        var paymentProviderHandler = new PaymentProviderHandler(TransactionStatus.Authorized);
+        var paymentService = CreatePaymentService(paymentProviderHandler);
         var orderId = Guid.NewGuid();
         var orderPlacedEvent = CreateOrderPlacedEvent(orderId);
 
@@ -137,10 +125,10 @@ public class PaymentServiceTests
             .ReturnsAsync(new List<Payment> { existingPayment });
 
         // Act
-        await _paymentService.ProcessPayment(orderPlacedEvent);
+        await paymentService.ProcessPayment(orderPlacedEvent);
 
         // Assert
-        _paymentFacadeMock.Verify(x => x.ProcessPayment(It.IsAny<Payment>()), Times.Never);
+        paymentProviderHandler.CallCount.Should().Be(0);
         _paymentRepositoryMock.Verify(x => x.AddPayment(It.IsAny<Payment>()), Times.Never);
         _mediatorHandlerMock.Verify(
             x => x.PublishEvent(It.Is<PaymentProcessedDomainEvent>(
@@ -154,6 +142,8 @@ public class PaymentServiceTests
     public async Task ProcessPayment_ShouldPublishDomainEvent_WhenPaymentIsProcessed()
     {
         // Arrange
+        var paymentProviderHandler = new PaymentProviderHandler(TransactionStatus.Authorized);
+        var paymentService = CreatePaymentService(paymentProviderHandler);
         var orderId = Guid.NewGuid();
         var orderPlacedEvent = CreateOrderPlacedEvent(orderId);
 
@@ -161,14 +151,8 @@ public class PaymentServiceTests
             .Setup(x => x.GetPaymentByOrderId(orderId))
             .ReturnsAsync(new List<Payment>());
 
-        var authorizedTransaction = CreateTransaction(TransactionStatus.Authorized);
-
-        _paymentFacadeMock
-            .Setup(x => x.ProcessPayment(It.IsAny<Payment>()))
-            .ReturnsAsync(authorizedTransaction);
-
         // Act
-        await _paymentService.ProcessPayment(orderPlacedEvent);
+        await paymentService.ProcessPayment(orderPlacedEvent);
 
         // Assert
         _unitOfWorkMock.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -178,6 +162,8 @@ public class PaymentServiceTests
     public async Task ProcessPayment_ShouldBeginTransaction_BeforeProcessing()
     {
         // Arrange
+        var paymentProviderHandler = new PaymentProviderHandler(TransactionStatus.Authorized);
+        var paymentService = CreatePaymentService(paymentProviderHandler);
         var orderId = Guid.NewGuid();
         var orderPlacedEvent = CreateOrderPlacedEvent(orderId);
 
@@ -185,17 +171,26 @@ public class PaymentServiceTests
             .Setup(x => x.GetPaymentByOrderId(orderId))
             .ReturnsAsync(new List<Payment>());
 
-        var authorizedTransaction = CreateTransaction(TransactionStatus.Authorized);
-
-        _paymentFacadeMock
-            .Setup(x => x.ProcessPayment(It.IsAny<Payment>()))
-            .ReturnsAsync(authorizedTransaction);
-
         // Act
-        await _paymentService.ProcessPayment(orderPlacedEvent);
+        await paymentService.ProcessPayment(orderPlacedEvent);
 
         // Assert
         _unitOfWorkMock.Verify(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    private PaymentService CreatePaymentService(PaymentProviderHandler paymentProviderHandler)
+    {
+        var httpClient = new HttpClient(paymentProviderHandler)
+        {
+            BaseAddress = new Uri("http://localhost:8000")
+        };
+
+        return new PaymentService(
+            _paymentFacadeMock.Object,
+            _paymentRepositoryMock.Object,
+            _unitOfWorkMock.Object,
+            _mediatorHandlerMock.Object,
+            httpClient);
     }
 
     private static OrderPlacedEvent CreateOrderPlacedEvent(Guid orderId)
@@ -235,5 +230,37 @@ public class PaymentServiceTests
             "12/25",
             "123"
         );
+    }
+
+    private sealed class PaymentProviderHandler : HttpMessageHandler
+    {
+        private readonly Queue<TransactionStatus> _statuses;
+
+        public int CallCount { get; private set; }
+
+        public PaymentProviderHandler(params TransactionStatus[] statuses)
+        {
+            _statuses = new Queue<TransactionStatus>(statuses);
+        }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            CallCount++;
+
+            if (_statuses.Count == 0)
+            {
+                throw new InvalidOperationException("No mocked transaction status configured.");
+            }
+
+            var transaction = CreateTransaction(_statuses.Dequeue());
+            var responseBody = JsonSerializer.Serialize(transaction);
+
+            var response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(responseBody, Encoding.UTF8, "application/json")
+            };
+
+            return Task.FromResult(response);
+        }
     }
 }

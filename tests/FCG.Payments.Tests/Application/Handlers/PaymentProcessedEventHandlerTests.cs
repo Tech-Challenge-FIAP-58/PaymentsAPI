@@ -3,6 +3,7 @@ using FCG.Payments.Application.Handlers;
 using FCG.Payments.Domain.Events;
 using FluentAssertions;
 using MassTransit;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace FCG.Payments.Test.Application.Handlers;
@@ -10,12 +11,32 @@ namespace FCG.Payments.Test.Application.Handlers;
 public class PaymentProcessedEventHandlerTests
 {
     private readonly Mock<IPublishEndpoint> _publishEndpointMock;
+    private readonly Mock<IBus> _busMock;
+    private readonly Mock<ISendEndpoint> _sendEndpointMock;
+    private readonly Mock<ILogger<PaymentProcessedEventHandler>> _loggerMock;
     private readonly PaymentProcessedEventHandler _handler;
 
     public PaymentProcessedEventHandlerTests()
     {
         _publishEndpointMock = new Mock<IPublishEndpoint>();
-        _handler = new PaymentProcessedEventHandler(_publishEndpointMock.Object);
+        _busMock = new Mock<IBus>();
+        _sendEndpointMock = new Mock<ISendEndpoint>();
+        _loggerMock = new Mock<ILogger<PaymentProcessedEventHandler>>();
+
+        _busMock
+            .Setup(x => x.GetSendEndpoint(It.IsAny<Uri>()))
+            .ReturnsAsync(_sendEndpointMock.Object);
+
+        _sendEndpointMock
+            .Setup(x => x.Send(
+                It.IsAny<NotificationMessage>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        _handler = new PaymentProcessedEventHandler(
+            _publishEndpointMock.Object,
+            _busMock.Object,
+            _loggerMock.Object);
     }
 
     [Fact]
@@ -171,8 +192,24 @@ public class PaymentProcessedEventHandlerTests
     {
         // Arrange
         var publishMock = new Mock<IPublishEndpoint>();
+        var busMock = new Mock<IBus>();
+        var sendEndpointMock = new Mock<ISendEndpoint>();
+        var loggerMock = new Mock<ILogger<PaymentProcessedEventHandler>>();
 
-        var handler = new PaymentProcessedEventHandler(publishMock.Object);
+        busMock
+            .Setup(x => x.GetSendEndpoint(It.IsAny<Uri>()))
+            .ReturnsAsync(sendEndpointMock.Object);
+
+        sendEndpointMock
+            .Setup(x => x.Send(
+                It.IsAny<NotificationMessage>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var handler = new PaymentProcessedEventHandler(
+            publishMock.Object,
+            busMock.Object,
+            loggerMock.Object);
 
         var paymentId = Guid.NewGuid();
         var domainEvent = new PaymentProcessedDomainEvent(

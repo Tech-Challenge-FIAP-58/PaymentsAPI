@@ -23,12 +23,10 @@ public interface IPaymentService
 
 public class PaymentService : IPaymentService
 {
-    // pedretti
-    private static readonly HttpClient _httpClient = new HttpClient
+    private static readonly HttpClient DefaultHttpClient = new HttpClient
     {
         BaseAddress = new Uri("http://localhost:8000")
     };
-    // fim pedretti
 
 
     private const int MAXATTEMPTS = 3;
@@ -37,16 +35,19 @@ public class PaymentService : IPaymentService
     private readonly IPaymentRepository _paymentRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMediatorHandler _mediatorHandler;
+    private readonly HttpClient _httpClient;
 
     public PaymentService(IPaymentFacade pagamentoFacade,
         IPaymentRepository pagamentoRepository,
         IUnitOfWork unitOfWork,
-        IMediatorHandler mediatorHandler)
+        IMediatorHandler mediatorHandler,
+        HttpClient? httpClient = null)
     {
         _paymentFacade = pagamentoFacade;
         _paymentRepository = pagamentoRepository;
         _unitOfWork = unitOfWork;
         _mediatorHandler = mediatorHandler;
+        _httpClient = httpClient ?? DefaultHttpClient;
     }
 
     public async Task ProcessPayment(OrderPlacedEvent eventData)
@@ -76,9 +77,6 @@ public class PaymentService : IPaymentService
 
         for (var attempt = 1; attempt <= MAXATTEMPTS; attempt++)
         {
-            //transaction = await _paymentFacade.ProcessPayment(payment);
-
-            // pedretti
             var json = JsonConvert.SerializeObject(eventData);
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -90,7 +88,6 @@ public class PaymentService : IPaymentService
             var body = await response.Content.ReadAsStringAsync();
 
             transaction = JsonConvert.DeserializeObject<Transaction>(body);
-            // fim pedretti
 
             if (transaction.Status == TransactionStatus.Authorized)
                 break;
