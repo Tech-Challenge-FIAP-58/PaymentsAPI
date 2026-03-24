@@ -84,7 +84,7 @@ public class PaymentService : IPaymentService
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("/", content);
+            var response = await _httpClient.PostAsync("", content);
 
             if (!response.IsSuccessStatusCode)
             {
