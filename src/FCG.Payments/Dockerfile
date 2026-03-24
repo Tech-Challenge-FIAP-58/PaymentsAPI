@@ -1,26 +1,25 @@
 # syntax=docker/dockerfile:1
 
-# =========================
-# Base (runtime)
-# =========================
-FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+=========================
+Base (runtime)
+=========================
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
+EXPOSE 8080
 
-# Se N√O estiver usando APP_UID no compose/ambiente, deixe comentado
-# USER $APP_UID
-
-
-# =========================
-# Build (restore + build)
-# =========================
+Se n√£o estiver usando UID customizado, mantenha comentado
+USER $APP_UID
+=========================
+Build (restore + build)
+=========================
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # -------------------------
-# Copia soluÁ„o (se existir)
+# Copia solu√ß√£o (se existir)
 # -------------------------
-# Remova esta linha se n„o houver .sln
+# Remova esta linha se n√£o houver .sln
 COPY FCG.Payments.slnx ./
 
 # -------------------------
@@ -34,7 +33,7 @@ COPY src/FCG.Payments/FCG.Payments.csproj src/FCG.Payments/
 RUN dotnet restore src/FCG.Payments/FCG.Payments.csproj
 
 # -------------------------
-# Copia o restante do cÛdigo
+# Copia o restante do c√≥digo
 # -------------------------
 COPY . .
 
