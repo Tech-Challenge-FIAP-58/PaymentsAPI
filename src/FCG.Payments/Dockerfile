@@ -1,17 +1,17 @@
 # syntax=docker/dockerfile:1
 
-=========================
-Base (runtime)
-=========================
+# =========================
+# Base (runtime)
+# =========================
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 8080
 
-Se não estiver usando UID customizado, mantenha comentado
-USER $APP_UID
-=========================
-Build (restore + build)
-=========================
+# Se não estiver usando UID customizado, mantenha comentado
+# USER $APP_UID
+# =========================
+# Build (restore + build)
+# =========================
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
