@@ -36,11 +36,13 @@ public class PaymentService : IPaymentService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMediatorHandler _mediatorHandler;
     private readonly HttpClient _httpClient;
+    private readonly ILogger<PaymentService> _logger;
 
     public PaymentService(IPaymentFacade pagamentoFacade,
         IPaymentRepository pagamentoRepository,
         IUnitOfWork unitOfWork,
         IMediatorHandler mediatorHandler,
+        ILogger<PaymentService> logger,
         HttpClient? httpClient = null)
     {
         _paymentFacade = pagamentoFacade;
@@ -48,6 +50,7 @@ public class PaymentService : IPaymentService
         _unitOfWork = unitOfWork;
         _mediatorHandler = mediatorHandler;
         _httpClient = httpClient ?? DefaultHttpClient;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task ProcessPayment(OrderPlacedEvent eventData)
