@@ -45,6 +45,7 @@ public class OrderPlacedEventConsumerTests
         var orderId = Guid.NewGuid();
         var orderPlacedEvent = new OrderPlacedEvent(
             1,
+            "customer@test.com",
             orderId,
             1,
             100m,
@@ -91,6 +92,7 @@ public class OrderPlacedEventConsumerTests
     {
         return new OrderPlacedEvent(
             1,
+            "customer@test.com",
             Guid.NewGuid(),
             1,
             100m,

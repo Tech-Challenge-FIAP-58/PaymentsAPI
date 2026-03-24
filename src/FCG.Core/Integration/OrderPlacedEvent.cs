@@ -3,6 +3,7 @@
 public class OrderPlacedEvent
 {
     public int ClientId { get; set; }
+    public string ClientEmail { get; set; }
     public Guid OrderId { get; set; }
     public int PaymentMethod { get; set; }
     public decimal Amount { get; set; }
@@ -11,10 +12,11 @@ public class OrderPlacedEvent
     public string ExpirationDate { get; set; }
     public string Cvv { get; set; }
 
-    public OrderPlacedEvent(int clientId, Guid orderId, int paymentMethod, decimal amount, string cardName,
+    public OrderPlacedEvent(int clientId, string clientEmail, Guid orderId, int paymentMethod, decimal amount, string cardName,
     string cardNumber, string expirationDate, string cvv)
     {
         ClientId = clientId;
+        ClientEmail = clientEmail;
         OrderId = orderId;
         PaymentMethod = paymentMethod;
         Amount = amount;

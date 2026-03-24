@@ -15,6 +15,7 @@ public class OrderEventExtensionsTests
         var customerId = 1;
         var orderPlacedEvent = new OrderPlacedEvent(
             customerId,
+            "customer@test.com",
             orderId,
             (int)PaymentMethod.CreditCard,
             150.50m,
@@ -41,6 +42,7 @@ public class OrderEventExtensionsTests
         // Arrange
         var orderPlacedEvent = new OrderPlacedEvent(
             1,
+            "customer@test.com",
             Guid.NewGuid(),
             (int)PaymentMethod.CreditCard,
             200m,
@@ -66,6 +68,7 @@ public class OrderEventExtensionsTests
         // Arrange
         var orderPlacedEvent = new OrderPlacedEvent(
             1,
+            "customer@test.com",
             Guid.NewGuid(),
             (int)PaymentMethod.CreditCard,
             99.99m,
@@ -88,6 +91,7 @@ public class OrderEventExtensionsTests
         // Arrange
         var orderPlacedEvent = new OrderPlacedEvent(
             1,
+            "customer@test.com",
             Guid.NewGuid(),
             (int)PaymentMethod.CreditCard,
             99.99m,
@@ -113,6 +117,7 @@ public class OrderEventExtensionsTests
         // Arrange
         var orderPlacedEvent = new OrderPlacedEvent(
             1,
+            "customer@test.com",
             Guid.NewGuid(),
             paymentMethodValue,
             99.99m,

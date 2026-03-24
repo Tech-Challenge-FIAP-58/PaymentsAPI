@@ -42,6 +42,7 @@ var bus = host.Services.GetRequiredService<IBus>();
 
 var message = new OrderPlacedEvent(
     clientId: 1,
+    clientEmail: "cliente@teste.com",
     orderId: new Guid(),
     paymentMethod: 1,
     amount: 250.75m,

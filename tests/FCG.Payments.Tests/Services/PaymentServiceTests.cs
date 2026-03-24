@@ -197,6 +197,7 @@ public class PaymentServiceTests
     {
         return new OrderPlacedEvent(
             1,
+            "customer@test.com",
             orderId,
             1,
             100m,
