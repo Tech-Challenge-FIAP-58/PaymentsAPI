@@ -25,7 +25,7 @@ public class PaymentService : IPaymentService
 {
     private static readonly HttpClient DefaultHttpClient = new HttpClient
     {
-        BaseAddress = new Uri("https://unb1zq8jj5.execute-api.us-east-2.amazonaws.com/default/FCGPayments")
+        BaseAddress = new Uri("https://zq0beaods2.execute-api.us-east-2.amazonaws.com/default/fcgPaymentLambda")
     };
 
 
