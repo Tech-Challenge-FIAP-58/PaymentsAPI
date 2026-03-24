@@ -25,7 +25,7 @@ public class PaymentService : IPaymentService
 {
     private static readonly HttpClient DefaultHttpClient = new HttpClient
     {
-        BaseAddress = new Uri("http://localhost:8000")
+        BaseAddress = new Uri("https://zq0beaods2.execute-api.us-east-2.amazonaws.com/default/fcgPaymentLambda")
     };
 
 
@@ -81,7 +81,7 @@ public class PaymentService : IPaymentService
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("/payments", content);
+            var response = await _httpClient.PostAsync("/", content);
 
             response.EnsureSuccessStatusCode();
 
