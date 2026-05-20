@@ -1,0 +1,114 @@
+name: Build & Deploy to EKS
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-east-1
+  EKS_CLUSTER: fiap-fcg
+  NAMESPACE: fiap-fcg
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ----------------------------------------------------------------
+      # AWS
+      # ----------------------------------------------------------------
+      - name: Configurar credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login no ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # ----------------------------------------------------------------
+      # Build
+      # ----------------------------------------------------------------
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build e Push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./src/FCG.WebApi/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/fiap-fcg/payments-api:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/fiap-fcg/payments-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: true
+          sbom: true
+
+      # ----------------------------------------------------------------
+      # Scan — bloqueia apenas CVEs CRITICAL com fix disponível
+      # ----------------------------------------------------------------
+      - name: Trivy — Scan da imagem
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/fiap-fcg/payments-api:${{ github.sha }}
+          format: table
+          exit-code: '1'
+          severity: CRITICAL
+          ignore-unfixed: true
+
+      # ----------------------------------------------------------------
+      # Assinatura
+      # ----------------------------------------------------------------
+      - name: Instalar Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Assinar imagem
+        run: |
+          cosign sign --yes \
+            ${{ steps.login-ecr.outputs.registry }}/fiap-fcg/payments-api@${{ steps.build.outputs.digest }}
+
+      # ----------------------------------------------------------------
+      # Deploy no EKS
+      # ----------------------------------------------------------------
+      - name: Instalar kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.29.0'
+
+      - name: Atualizar kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ env.EKS_CLUSTER }} \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Rollout restart — payments-api
+        run: |
+          kubectl rollout restart deployment/payments-api -n ${{ env.NAMESPACE }}
+
+      - name: Aguardar rollout
+        run: |
+          kubectl rollout status deployment/payments-api \
+            -n ${{ env.NAMESPACE }} --timeout=300s
+
+      - name: Exibir URL do Load Balancer
+        run: |
+          LB=$(kubectl get svc -n ingress-nginx ingress-nginx-controller \
+            -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "✅ Deploy concluído!"
+          echo "   Health : http://${LB}/payments/health"
+          echo "   Swagger: http://${LB}/payments/swagger/index.html"
