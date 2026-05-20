@@ -4,6 +4,12 @@
 # Base (runtime)
 # =========================
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 EXPOSE 8080
 
