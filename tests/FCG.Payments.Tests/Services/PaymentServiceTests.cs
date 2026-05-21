@@ -12,6 +12,8 @@ using Moq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace FCG.Payments.Test.Services;
 
@@ -185,11 +187,17 @@ public class PaymentServiceTests
             BaseAddress = new Uri("http://localhost:8000")
         };
 
+        var loggerMock = new Mock<ILogger<PaymentService>>();
+        var configurationMock = new Mock<IConfiguration>();
+        configurationMock.Setup(c => c["Lambda__PaymentsUrl"]).Returns("http://localhost:8000");
+
         return new PaymentService(
             _paymentFacadeMock.Object,
             _paymentRepositoryMock.Object,
             _unitOfWorkMock.Object,
             _mediatorHandlerMock.Object,
+            loggerMock.Object,
+            configurationMock.Object,
             httpClient);
     }
 

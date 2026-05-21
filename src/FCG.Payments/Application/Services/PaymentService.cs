@@ -23,12 +23,6 @@ public interface IPaymentService
 
 public class PaymentService : IPaymentService
 {
-    private static readonly HttpClient DefaultHttpClient = new HttpClient
-    {
-        BaseAddress = new Uri("https://zq0beaods2.execute-api.us-east-2.amazonaws.com/default/fcgPaymentLambda")
-    };
-
-
     private const int MAXATTEMPTS = 3;
 
     private readonly IPaymentFacade _paymentFacade;
@@ -43,14 +37,19 @@ public class PaymentService : IPaymentService
         IUnitOfWork unitOfWork,
         IMediatorHandler mediatorHandler,
         ILogger<PaymentService> logger,
+        IConfiguration configuration,
         HttpClient? httpClient = null)
     {
         _paymentFacade = pagamentoFacade;
         _paymentRepository = pagamentoRepository;
         _unitOfWork = unitOfWork;
         _mediatorHandler = mediatorHandler;
-        _httpClient = httpClient ?? DefaultHttpClient;
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+        var lambdaUrl = configuration["Lambda__PaymentsUrl"]
+                     ?? configuration["Lambda:PaymentsUrl"]
+                     ?? "https://gsoyoj7s0c.execute-api.us-east-1.amazonaws.com/default/";
+        _httpClient = httpClient ?? new HttpClient { BaseAddress = new Uri(lambdaUrl) };
     }
 
     public async Task ProcessPayment(OrderPlacedEvent eventData)

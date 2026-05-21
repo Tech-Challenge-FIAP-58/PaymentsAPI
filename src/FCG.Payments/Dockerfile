@@ -32,6 +32,8 @@ COPY FCG.Payments.slnx ./
 # Copia apenas o csproj (cache de restore)
 # -------------------------
 COPY src/FCG.Payments/FCG.Payments.csproj src/FCG.Payments/
+COPY src/FCG.Core/FCG.Core.csproj src/FCG.Core/
+COPY src/FCG.FakePaymentProvider/FCG.FakePaymentProvider.csproj src/FCG.FakePaymentProvider/
 
 # -------------------------
 # Restore
