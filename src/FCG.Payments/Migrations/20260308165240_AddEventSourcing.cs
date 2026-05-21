@@ -11,7 +11,6 @@ namespace FCG.Payments.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-        /*
             migrationBuilder.CreateTable(
                 name: "StoredEvents",
                 columns: table => new
@@ -27,7 +26,6 @@ namespace FCG.Payments.Migrations
                 {
                     table.PrimaryKey("PK_StoredEvents", x => x.Id);
                 });
-            */
         }
 
         /// <inheritdoc />
